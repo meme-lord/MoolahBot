@@ -3,6 +3,7 @@ import random
 
 from discord import Embed
 from discord.ext import commands
+from discord import File
 
 
 class Welcome(commands.Cog):
@@ -21,7 +22,6 @@ class Welcome(commands.Cog):
         :return:
         """
         image = random.choice([self.loc + x for x in os.listdir(self.loc)])
-        with open(image, 'r') as fp:
-            embed = Embed(title="                ",
-                          description="Welcome to our humble abode :island:  " + member.mention, color=0xf1ec1b)
-            await member.guild.system_channel.send(embed=embed, file=image)
+        embed = Embed(title="                ",
+                      description="Welcome to our humble abode :island:  " + member.mention, color=0xf1ec1b)
+        await member.guild.system_channel.send(embed=embed, file=File(image))
