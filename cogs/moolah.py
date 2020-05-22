@@ -16,11 +16,13 @@ class Moolah(commands.Cog):
 
 	@commands.command()
 	async def topdog(self, ctx):
-		entries = database.topdog()
+		entries = database.topdog(ctx.guild.id)
 		x = PrettyTable(["Position", "Name", "Moolah"])
 		position = 1
 		for entry in entries:
-			x.add_row([position, ctx.guild.fetch_member(entry[0]).nick, entry[1]])
+			member = await ctx.guild.fetch_member(entry[0])
+			x.add_row([position, member.display_name, entry[1]])
+			position += 1
 		await ctx.send(f"```{x}```")
 
 	@commands.Cog.listener(name='on_message')
