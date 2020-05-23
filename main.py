@@ -42,5 +42,5 @@ class MyClient(commands.Bot):
 
 
 if __name__ == "__main__":
-	bot = MyClient(command_prefix='matplotlib!')
+	bot = MyClient(command_prefix='!')
 	bot.run(config.bot_token)
