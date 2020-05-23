@@ -1,0 +1,5 @@
+Pillow
+PrettyTable
+mysqlclient
+discord
+matplotlib

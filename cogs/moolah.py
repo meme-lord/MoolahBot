@@ -1,15 +1,18 @@
-from discord.ext import commands
 import asyncio
 import logging
-import database
-import config
+
+from discord.ext import commands
 from prettytable import PrettyTable
+
+import config
+import database
 
 log = logging.getLogger(__name__)
 
 
 class Moolah(commands.Cog):
 	"""Keeping the Moolah economy going"""
+
 	def __init__(self, bot):
 		self.bot = bot
 		self.provision = self.bot.loop.create_task(self.moolah_loop())
@@ -44,3 +47,12 @@ class Moolah(commands.Cog):
 			database.vc_moolah_earned(ids, config.vc_moolah)
 			await asyncio.sleep(config.vc_time)
 
+
+def setup(bot):
+	bot.add_cog(Moolah(bot))
+	print(__name__, " loaded!")
+
+
+def teardown(bot):
+	# Actions before unloading
+	print(__name__, " unloaded!")

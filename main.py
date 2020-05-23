@@ -1,12 +1,12 @@
-import config
 import logging
-import database
-from Cogs.basic import Basic
-from Cogs.moolah import Moolah
-from Cogs.welcome import Welcome
-from Cogs.cointoss import CoinToss
+from os import listdir
+from os.path import isfile, join
 from sys import stdout
+
 from discord.ext import commands
+
+import config
+import database
 
 log = logging.getLogger(__name__)
 # noinspection PyArgumentList
@@ -25,6 +25,10 @@ class MyClient(commands.Bot):
 
 	async def on_ready(self):
 		log.info('Bot started\nLogged in as %s (%s)\n' % (self.user.name, self.user.id))
+
+		# Automated Cog Loader
+		[self.load_extension("cogs." + f.replace(".py", "")) for f in listdir('cogs') if isfile(join('cogs', f))]
+
 		for server in self.guilds:
 			message = "%s : %s\n" % (server.name, server.id)
 			for channel in server.channels:
@@ -37,9 +41,6 @@ class MyClient(commands.Bot):
 		database.add_user(member.id, member.guild.id)
 
 
-bot = MyClient(command_prefix='!')
-bot.add_cog(Basic(bot))
-bot.add_cog(Moolah(bot))
-bot.add_cog(Welcome(bot))
-bot.add_cog(CoinToss(bot))
-bot.run(config.bot_token)
+if __name__ == "__main__":
+	bot = MyClient(command_prefix='matplotlib!')
+	bot.run(config.bot_token)

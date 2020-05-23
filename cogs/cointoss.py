@@ -1,10 +1,12 @@
-import discord
-import database
-import threading
+import asyncio
 import logging
 import secrets
-import asyncio
+import threading
+
+import discord
 from discord.ext import commands
+
+import database
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +14,7 @@ log = logging.getLogger(__name__)
 class CoinToss(commands.Cog):
 	cointoss_lock = threading.Lock()
 	"""Letting you lose all your Moolah since 2017!"""
+
 	def __init__(self, bot):
 		self.bot = bot
 		self.outcomes = ['heads', 'tails']  # could have other sets of outcomes? roulette anyone?
@@ -54,8 +57,18 @@ class CoinToss(commands.Cog):
 			if msg.content.lower() is outcome:
 				winner = opponent
 			await ctx.send(f"{winner.mention} won {amount} Moolah!")
-			success, err_msg = database.execute_transaction(2, winner.id, 0, ctx.guild.id, amount*2)
+			success, err_msg = database.execute_transaction(2, winner.id, 0, ctx.guild.id, amount * 2)
 			if not success:
 				await ctx.send(err_msg)
 		else:
 			await ctx.send("Invalid choice")
+
+
+def setup(bot):
+	bot.add_cog(CoinToss(bot))
+	print(__name__, " loaded!")
+
+
+def teardown(bot):
+	# Actions before unloading
+	print(__name__, " unloaded!")

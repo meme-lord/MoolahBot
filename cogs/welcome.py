@@ -2,8 +2,8 @@ import os
 import random
 
 from discord import Embed
-from discord.ext import commands
 from discord import File
+from discord.ext import commands
 
 
 class Welcome(commands.Cog):
@@ -25,3 +25,13 @@ class Welcome(commands.Cog):
         embed = Embed(title="                ",
                       description="Welcome to our humble abode :island:  " + member.mention, color=0xf1ec1b)
         await member.guild.system_channel.send(embed=embed, file=File(image))
+
+
+def setup(bot):
+	bot.add_cog(Welcome(bot))
+	print(__name__, " loaded!")
+
+
+def teardown(bot):
+	# Actions before unloading
+	print(__name__, " unloaded!")

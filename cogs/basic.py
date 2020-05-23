@@ -12,3 +12,13 @@ class Basic(commands.Cog):
 	@commands.command()
 	async def pong(self, ctx):
 		await ctx.send("Don't get smart with me kiddo")
+
+
+def setup(bot):
+	bot.add_cog(Basic(bot))
+	print(__name__, " loaded!")
+
+
+def teardown(bot):
+	# Actions before unloading
+	print(__name__, " unloaded!")
