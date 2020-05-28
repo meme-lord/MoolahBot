@@ -21,6 +21,8 @@ class Moolah(commands.Cog):
 	async def topdog(self, ctx):
 		entries = database.topdog(ctx.guild.id)
 		x = PrettyTable(["Position", "Name", "Moolah"])
+		x.align["Name"] = 'l'
+		x.align["Moolah"] = 'l'
 		position = 1
 		for entry in entries:
 			member = await ctx.guild.fetch_member(entry[0])

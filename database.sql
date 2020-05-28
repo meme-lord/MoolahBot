@@ -11,8 +11,8 @@ CREATE TABLE users (
 CREATE TABLE transactions (
     id int NOT NULL AUTO_INCREMENT,
     type int,
-    recipient bigint NOT NULL,
     amount bigint NOT NULL,
+    recipient bigint NOT NULL,
     sender bigint NOT NULL,
     guild_id bigint NOT NULL,
     timestamp int,
@@ -29,4 +29,7 @@ CREATE TABLE transaction_types (
 INSERT INTO transaction_types VALUES
 (1,'user_to_user','A transaction between two users'),
 (2,'cointoss_escrow','Balance kept in escrow for a cointoss bet'),
-(3,'cointoss','Winnings or losses from cointoss bet');
+(3,'cointoss','Winnings or losses from cointoss bet'),
+(4,'message_moolah','Moolah earned for messages'),
+(5,'vc_moolah','Moolah earned for voice chat'),
+(6,'slots','Winnings and payment for slots');

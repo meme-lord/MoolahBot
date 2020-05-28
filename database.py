@@ -5,6 +5,7 @@ import logging
 from typing import List, Set, Tuple
 
 log = logging.getLogger(__name__)
+lock = threading.Lock()  # Lock is needed for transaction integrity don't forget to release!
 
 # https://mysqlclient.readthedocs.io/
 
@@ -22,14 +23,14 @@ def execute_transaction(type_id: int, recipient_id: int, sender_id: int, guild_i
 			balance = c.fetchone()
 			# Check if sender balance is sufficient
 			if balance is None:
-				return False, "ERROR: User does not exist"
+				return False, "ERROR: User {sender} does not exist"
 			if balance[0] < amount:
-				return False, "ERROR: User has insufficient funds"
+				return False, "ERROR: User {sender} has insufficient moolah funds"
 		log.debug("about to exec transaction")
 		# Execute transaction
 		c.execute(
-			"INSERT INTO transactions (type, recipient, amount, sender, timestamp) VALUES (%s, %s, %s, %s, UNIX_TIMESTAMP())",
-			(type_id, recipient_id, amount, sender_id))
+			"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (%s, %s, %s, %s, %s, UNIX_TIMESTAMP())",
+			(type_id, amount, recipient_id, sender_id, guild_id))
 		c.execute("UPDATE users SET balance=balance-%s WHERE discord_id=%s AND guild_id=%s", (amount, sender_id, guild_id))
 		c.execute("UPDATE users SET balance=balance+%s WHERE discord_id=%s AND guild_id=%s", (amount, recipient_id, guild_id))
 	log.debug(f"execute_transaction({type_id}, {recipient_id}, {sender_id}, {amount}) -> SUCCESS")
@@ -41,20 +42,24 @@ def vc_moolah_earned(users: Set[Tuple[int, int]], amount: int):
 	amount = abs(int(amount))
 	c = db.cursor()
 
-	lock.acquire()
-	c.executemany(f"UPDATE users SET balance=balance+{amount} WHERE discord_id=%s AND guild_id=%s", users)
-	lock.release()
+	with lock:
+		c.executemany(f"UPDATE users SET balance=balance+{amount},lifetime_moolah=lifetime_moolah+{amount} WHERE discord_id=%s AND guild_id=%s", users)
+	c.executemany(
+		f"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (5, {amount}, %s, 0, %s, UNIX_TIMESTAMP())", users)
+	c.execute()
 
 
 def moolah_earned(discord_id: int, guild_id: int, amount: int):
 	amount = abs(int(amount))
 	c = db.cursor()
 
-	lock.acquire()
+	with lock:
+		c.execute(
+			f"UPDATE users SET balance=balance+%s,lifetime_moolah=lifetime_moolah+%s WHERE discord_id=%s AND guild_id=%s",
+			(amount, amount, discord_id, guild_id))
 	c.execute(
-		f"UPDATE users SET balance=balance+%s WHERE discord_id=%s AND guild_id=%s",
-		(amount, discord_id, guild_id))
-	lock.release()
+		f"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (%s, %s, %s, 0, %s, UNIX_TIMESTAMP())",
+		(4, amount, discord_id, guild_id))
 
 
 def topdog(guild_id: int):
@@ -122,6 +127,5 @@ def get_user_balance(discord_id: int, guild_id: int):
 
 db = MySQLdb.connect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
 db.autocommit(True)
-lock = threading.Lock()  # Lock is needed for transaction integrity don't forget to release!
 member_dict = None
 get_member_id_dict()
