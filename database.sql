@@ -4,7 +4,6 @@ CREATE TABLE users (
     guild_id bigint,
     balance bigint,
     lifetime_moolah bigint,
-    user_initialise_time int,
     PRIMARY KEY (discord_id,guild_id)
 );
 

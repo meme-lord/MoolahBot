@@ -2,6 +2,7 @@ import MySQLdb
 import config
 import threading
 import logging
+import mydbwrapper
 from typing import List, Set, Tuple
 
 log = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ def add_user(discord_id: int, guild_id: int):
 	if discord_id not in member_dict[guild_id]:
 		c = db.cursor()
 		c.execute(
-			"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah, user_initialise_time) VALUES (%s, %s, 0, 0, UNIX_TIMESTAMP())",
+			"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0, UNIX_TIMESTAMP())",
 			(discord_id, guild_id))
 		member_dict[guild_id] = discord_id
 
@@ -92,7 +93,7 @@ def add_users(discord_ids: List[int], guild_id: int):
 
 	c = db.cursor()
 	c.executemany(
-		"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah, user_initialise_time) VALUES (%s, %s, 0, 0, UNIX_TIMESTAMP())",
+		"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0, UNIX_TIMESTAMP())",
 		new_users)
 	member_dict[guild_id].update(new_users)
 
@@ -125,7 +126,8 @@ def get_user_balance(discord_id: int, guild_id: int):
 	return res[0]
 
 
-db = MySQLdb.connect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
+db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
+# db = MySQLdb.connect()
 db.autocommit(True)
 member_dict = None
 get_member_id_dict()
