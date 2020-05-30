@@ -1,4 +1,7 @@
 from discord.ext import commands
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class Basic(commands.Cog):
@@ -16,9 +19,9 @@ class Basic(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Basic(bot))
-	print(__name__, " loaded!")
+	log.info(__name__, " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	print(__name__, " unloaded!")
+	log.info(__name__, " unloaded!")

@@ -61,9 +61,9 @@ class CoinToss(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(CoinToss(bot))
-	print(__name__, " loaded!")
+	log.info(__name__, " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	print(__name__, " unloaded!")
+	log.info(__name__, " unloaded!")
