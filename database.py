@@ -53,7 +53,6 @@ def vc_moolah_earned(users: Set[Tuple[int, int]], amount: int):
 	c.executemany(
 		f"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (5, {amount}, %s, 0, %s, UNIX_TIMESTAMP())",
 		users)
-	c.execute()
 
 
 def moolah_earned(discord_id: int, guild_id: int, amount: int):
@@ -134,21 +133,15 @@ def get_user_balance(discord_id: int, guild_id: int):
 	return res[0]
 
 
-def get_property(c_name: str, userid: int, guildid: int, fetch='one'):
+def get_property(c_name: str, userid: int, guildid: int):
 	c = db.cursor()
 	log.debug(f"get_user_{c_name}({userid}, {guildid})")
 	c.execute(f"SELECT {c_name} FROM users WHERE discord_id=%s and guild_id=%s", (userid, guildid))
-	if fetch == 'one':
-		res = c.fetchone()
-		if res is None:
-			log.error(f"User {userid} for guild {guildid} did not appear in the DB")
-			res = (0,)
-	elif fetch == 'all':
-		res = c.fetchall()
-		if res is None:
-			log.error(f"User {userid} for guild {guildid} did not appear in the DB")
-			res = (0,)
-	r = res[0] if fetch == 'one' else res
+	res = c.fetchone()
+	if res is None:
+		log.error(f"User {userid} for guild {guildid} did not appear in the DB")
+		res = (0,)
+	r = res[0]
 	log.debug(f"get_user_{c_name}({userid}, {guildid}) is returning {r}")
 	c.close()
 	return r
@@ -160,7 +153,10 @@ def get_vctime(userid: int, guildid: int):
 	"""
 	c = db.cursor()
 	c.execute("SELECT COUNT(*) FROM transactions WHERE type=5 and recipient=%s and guild_id=%s", (userid, guildid))
-	return c.fetchone()
+	res = c.fetchone()
+	if res is None:
+		return 0
+	return res[0]
 
 
 def get_leaderboard(user_id):
@@ -169,15 +165,12 @@ def get_leaderboard(user_id):
 	and returns index position +1
 	:return int:
 	"""
-	try:
-		c = db.cursor()
-		c.execute("SELECT * FROM users ORDER BY balance DESC")
-		pos = [i for i, j in enumerate(c.fetchall()) if int(j[0]) == int(user_id)]
-		result = int(pos[0] + 1)
-		c.close()
-	except Exception as e:
-		result = 0
-		log.error(e)
+	c = db.cursor()
+	c.execute("SELECT * FROM users ORDER BY balance DESC")
+	pos = [i for i, j in enumerate(c.fetchall()) if int(j[0]) == int(user_id)]
+	result = int(pos[0] + 1)
+	c.close()
+
 	return result
 
 

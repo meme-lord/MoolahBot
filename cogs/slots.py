@@ -73,7 +73,7 @@ class Slots(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Slots(bot))
-	log.info(__name__ + " loaded!")
+	log.info(f"{__name__} loaded!")
 
 
 def teardown(bot):
@@ -81,4 +81,4 @@ def teardown(bot):
 
 	# Remove Events
 	bot.event.pop(__name__, None)
-	log.info(__name__ + " unloaded!")
+	log.info(f"{__name__} unloaded!")

@@ -17,6 +17,9 @@ class Achievements(commands.Cog):
 
 	@on_vc_moolah_update
 	async def check_pos_leaderboard(self, var):
+		if var is None:
+			log.error(f"check_pos_leaderboard was called with None var")
+			return
 		for user in var:
 			position = int(get_leaderboard(user.id))
 			if position in range(1, 100):  # if position in top 100
@@ -53,7 +56,7 @@ class Achievements(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Achievements(bot))
-	log.info(__name__ + " loaded!")
+	log.info(f"{__name__} loaded!")
 
 
 def teardown(bot):
@@ -61,4 +64,4 @@ def teardown(bot):
 
 	# Remove Events
 	bot.event.pop(__name__, None)
-	log.info(__name__ + " unloaded!")
+	log.info(f"{__name__} unloaded!")

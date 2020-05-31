@@ -42,7 +42,7 @@ class PersonalStats(commands.Cog):
 			draw.text(((W - w) / 2, (H - h) / 1.8), moolahtxt, font=self.fnt, fill=(255, 255, 0))
 
 			# VC TIME
-			vctime = str(timedelta(minutes=get_vctime(ctx.author.id, ctx.guild.id)[0]))
+			vctime = str(timedelta(minutes=get_vctime(ctx.author.id, ctx.guild.id)))
 			w1, h1 = draw.textsize(vctime, font=self.fnt2)
 			draw.text(((W - w1) / 10.5, (H - h1) / 7.5), vctime[:-3], font=self.fnt2, fill=(255, 255, 0))
 
@@ -62,15 +62,8 @@ class PersonalStats(commands.Cog):
 			w1, h1 = draw.textsize(lt_moolah, font=self.fnt2)
 			draw.text(((W - w1) / 10.5, (H - h1) / 2.9), lt_moolah, font=self.fnt2, fill=(255, 255, 0))
 
-			# Server Join time
-			try:
-				jtime = str(
-					datetime.fromtimestamp(get_property('user_initialise_time', ctx.author.id, ctx.guild.id)).strftime(
-						"%d-%b-%y  %I:%M"))
-			except Exception as e:
-				log.error(e)
-				# Use Discord Default
-				jtime = str(ctx.author.joined_at.strftime("%d-%b-%y  %I:%M"))
+			# Use Discord Default
+			jtime = str(ctx.author.joined_at.strftime("%d-%b-%y  %I:%M"))
 			w1, h1 = draw.textsize(jtime, font=self.fnt2)
 			draw.text(((W - w1) / 1.06, (H - h1) / 2.9), jtime, font=self.fnt2, fill=(255, 255, 0))
 
@@ -138,7 +131,7 @@ def m_balance_graph():
 
 def setup(bot):
 	bot.add_cog(PersonalStats(bot))
-	log.info(__name__ + " loaded!")
+	log.info(f"{__name__} loaded!")
 
 
 def teardown(bot):
@@ -146,4 +139,4 @@ def teardown(bot):
 
 	# Remove Events
 	bot.event.pop(__name__, None)
-	log.info(__name__ + " unloaded!")
+	log.info(f"{__name__} unloaded!")

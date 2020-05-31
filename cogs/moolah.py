@@ -48,16 +48,18 @@ class Moolah(commands.Cog):
 		onup = self.bot.events[__name__]['moolahVoice']
 		await self.bot.wait_until_ready()
 		while not self.bot.is_closed():
+			log.info("Start of moolah loop")
 			# award the vc moolah
 			ids = set()
 			for guild in self.bot.guilds:
 				for channel in guild.voice_channels:
 					real_p = [x for x in channel.members if x.bot is False]
 					if len(real_p) > 1:
-						for discord_id in real_p:
-							ids.add((discord_id, guild.id))
-							await onup.set([discord_id])
-			database.vc_moolah_earned(ids, config.vc_moolah)
+						for member in real_p:
+							ids.add((member.id, guild.id))
+			if ids:
+				database.vc_moolah_earned(ids, config.vc_moolah)
+				await onup.set(list(map(lambda x: x[0], ids)))
 			# clean up message dict
 			five_mins_ago = datetime.datetime.now(datetime.timezone.utc) - self.time_between_moolah_msgs
 			# this dict loop runs every minute maybe impact can be reduced?
@@ -69,7 +71,7 @@ class Moolah(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Moolah(bot))
-	log.info(__name__ + " loaded!")
+	log.info(f"{__name__} loaded!")
 
 
 def teardown(bot):
@@ -77,4 +79,4 @@ def teardown(bot):
 
 	# Remove Events
 	bot.event.pop(__name__, None)
-	log.info(__name__ + " unloaded!")
+	log.info(f"{__name__} unloaded!")
