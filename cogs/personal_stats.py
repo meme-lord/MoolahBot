@@ -124,9 +124,9 @@ def m_balance_graph():
 
 def setup(bot):
 	bot.add_cog(PersonalStats(bot))
-	print(__name__, " loaded!")
+	log.info(f"{__name__} loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	print(__name__, " unloaded!")
+	log.info(f"{__name__} unloaded!")

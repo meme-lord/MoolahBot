@@ -32,9 +32,9 @@ class Welcome(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Welcome(bot))
-	log.info(__name__, " loaded!")
+	log.info(f"{__name__} loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	log.info(__name__, " unloaded!")
+	log.info(f"{__name__} unloaded!")
