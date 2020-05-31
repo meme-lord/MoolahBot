@@ -22,6 +22,7 @@ logging.basicConfig(
 class MyClient(commands.Bot):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.events = {}
 
 	async def on_ready(self):
 		log.info('Bot started\nLogged in as %s (%s)\n' % (self.user.name, self.user.id))

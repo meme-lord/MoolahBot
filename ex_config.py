@@ -6,4 +6,4 @@ DB_DATABASE = "moolah"
 vc_moolah = 10
 vc_time = 60
 msg_moolah = 5
-time_between_msg_moolah = 300 # seconds
+time_between_msg_moolah = 300  # seconds

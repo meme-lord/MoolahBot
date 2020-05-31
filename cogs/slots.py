@@ -1,8 +1,10 @@
-from discord.ext import commands
-import database
-import secrets
 import asyncio
 import logging
+import secrets
+
+from discord.ext import commands
+
+import database
 
 log = logging.getLogger(__name__)
 
@@ -10,6 +12,7 @@ log = logging.getLogger(__name__)
 class Slots(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
+		self.bot.events[__name__] = {}
 
 	@commands.command()
 	async def slots(self, ctx, amount):
@@ -37,16 +40,18 @@ class Slots(commands.Cog):
 
 		await sent_msg.edit(content=slot_machine.format(first=items[result[0]][2], second='  ', third='  '))
 		await asyncio.sleep(0.6)
-		await sent_msg.edit(content=slot_machine.format(first=items[result[0]][2], second=items[result[1]][2], third='  '))
+		await sent_msg.edit(
+			content=slot_machine.format(first=items[result[0]][2], second=items[result[1]][2], third='  '))
 		await asyncio.sleep(0.6)
-		await sent_msg.edit(content=slot_machine.format(first=items[result[0]][2], second=items[result[1]][2], third=items[result[2]][2]))
+		await sent_msg.edit(content=slot_machine.format(first=items[result[0]][2], second=items[result[1]][2],
+														third=items[result[2]][2]))
 
 		won_something = False
 		log.info(f"Result: {result}")
 		for item in set(result):
 			count = result.count(item)
 			log.info(f"{item} appears {count} times")
-			if count is 2:
+			if count == 2:
 				pool = amount * items[item][0]
 				await ctx.send(f"You won {pool} moolah!")
 				success, err_msg = database.execute_transaction(6, 0, ctx.author.id, ctx.guild.id, pool)
@@ -54,7 +59,7 @@ class Slots(commands.Cog):
 					await ctx.send(err_msg.format(sender={ctx.author.mention}))
 					return
 				won_something = True
-			elif count is 3:
+			elif count == 3:
 				pool = amount * items[item][1]
 				await ctx.send(f"You won {pool} moolah!")
 				success, err_msg = database.execute_transaction(6, 0, ctx.author.id, ctx.guild.id, pool)
@@ -68,9 +73,12 @@ class Slots(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Slots(bot))
-	log.info(__name__, " loaded!")
+	log.info(__name__ + " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	log.info(__name__, " unloaded!")
+
+	# Remove Events
+	bot.event.pop(__name__, None)
+	log.info(__name__ + " unloaded!")

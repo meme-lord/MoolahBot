@@ -7,6 +7,7 @@ from prettytable import PrettyTable
 
 import config
 import database
+from lib.events import EventV2
 
 log = logging.getLogger(__name__)
 
@@ -17,8 +18,15 @@ class Moolah(commands.Cog):
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.bot.events[__name__] = {}
+		self.bot.events[__name__]['moolahVoice'] = EventV2()
 		self.provision = self.bot.loop.create_task(self.moolah_loop())
 		self.time_between_moolah_msgs = datetime.timedelta(seconds=config.time_between_msg_moolah)
+
+	@commands.command()
+	async def fire(self, ctx, input):
+		onup = self.bot.events[__name__]['moolahVoice']
+		onup.set(input)
 
 	@commands.command()
 	async def topdog(self, ctx):
@@ -42,6 +50,7 @@ class Moolah(commands.Cog):
 			database.moolah_earned(message.author.id, message.guild.id, config.msg_moolah)
 
 	async def moolah_loop(self):
+		onup = self.bot.events[__name__]['moolahVoice']
 		await self.bot.wait_until_ready()
 		while not self.bot.is_closed():
 			# award the vc moolah
@@ -49,11 +58,12 @@ class Moolah(commands.Cog):
 			for guild in self.bot.guilds:
 				for channel in guild.voice_channels:
 					real_p = [x for x in channel.members if x.bot is False]
-					if len(real_p) > 1:
+					if len(real_p) > 0:
 						for discord_id in real_p:
+							print(discord_id, discord_id.id)
+							onup.set(discord_id.id)
 							ids.add((discord_id, guild.id))
 			database.vc_moolah_earned(ids, config.vc_moolah)
-
 			# clean up message dict
 			five_mins_ago = datetime.datetime.now(datetime.timezone.utc) - self.time_between_moolah_msgs
 			# this dict loop runs every minute maybe impact can be reduced?
@@ -65,9 +75,12 @@ class Moolah(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Moolah(bot))
-	log.info(__name__, " loaded!")
+	log.info(__name__ + " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	log.info(__name__, " unloaded!")
+
+	# Remove Events
+	bot.event.pop(__name__, None)
+	log.info(__name__ + " unloaded!")

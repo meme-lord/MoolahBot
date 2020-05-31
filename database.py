@@ -1,12 +1,13 @@
-import MySQLdb
-import config
-import threading
 import logging
-import mydbwrapper
+import threading
 from typing import List, Set, Tuple
+
+import config
+import mydbwrapper
 
 log = logging.getLogger(__name__)
 lock = threading.Lock()  # Lock is needed for transaction integrity don't forget to release!
+
 
 # https://mysqlclient.readthedocs.io/
 
@@ -32,8 +33,10 @@ def execute_transaction(type_id: int, recipient_id: int, sender_id: int, guild_i
 		c.execute(
 			"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (%s, %s, %s, %s, %s, UNIX_TIMESTAMP())",
 			(type_id, amount, recipient_id, sender_id, guild_id))
-		c.execute("UPDATE users SET balance=balance-%s WHERE discord_id=%s AND guild_id=%s", (amount, sender_id, guild_id))
-		c.execute("UPDATE users SET balance=balance+%s WHERE discord_id=%s AND guild_id=%s", (amount, recipient_id, guild_id))
+		c.execute("UPDATE users SET balance=balance-%s WHERE discord_id=%s AND guild_id=%s",
+				  (amount, sender_id, guild_id))
+		c.execute("UPDATE users SET balance=balance+%s WHERE discord_id=%s AND guild_id=%s",
+				  (amount, recipient_id, guild_id))
 	log.debug(f"execute_transaction({type_id}, {recipient_id}, {sender_id}, {amount}) -> SUCCESS")
 	return True, f"{amount} Moolah sent from {sender_id} to {recipient_id}"
 
@@ -44,9 +47,12 @@ def vc_moolah_earned(users: Set[Tuple[int, int]], amount: int):
 	c = db.cursor()
 
 	with lock:
-		c.executemany(f"UPDATE users SET balance=balance+{amount},lifetime_moolah=lifetime_moolah+{amount} WHERE discord_id=%s AND guild_id=%s", users)
+		c.executemany(
+			f"UPDATE users SET balance=balance+{amount},lifetime_moolah=lifetime_moolah+{amount} WHERE discord_id=%s AND guild_id=%s",
+			users)
 	c.executemany(
-		f"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (5, {amount}, %s, 0, %s, UNIX_TIMESTAMP())", users)
+		f"INSERT INTO transactions (type, amount, recipient, sender, guild_id, timestamp) VALUES (5, {amount}, %s, 0, %s, UNIX_TIMESTAMP())",
+		users)
 	c.execute()
 
 
@@ -65,7 +71,9 @@ def moolah_earned(discord_id: int, guild_id: int, amount: int):
 
 def topdog(guild_id: int):
 	c = db.cursor()
-	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC LIMIT 10", (guild_id,))
+	c.execute(
+		"SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC LIMIT 10",
+		(guild_id,))
 	return c.fetchall()
 
 
@@ -124,6 +132,53 @@ def get_user_balance(discord_id: int, guild_id: int):
 		res = (0,)
 	log.debug(f"get_user_balance({discord_id}, {guild_id}) is returning {res[0]}")
 	return res[0]
+
+
+def get_property(c_name: str, userid: int, guildid: int, fetch='one'):
+	c = db.cursor()
+	log.debug(f"get_user_{c_name}({userid}, {guildid})")
+	c.execute(f"SELECT {c_name} FROM users WHERE discord_id=%s and guild_id=%s", (userid, guildid))
+	if fetch == 'one':
+		res = c.fetchone()
+		if res is None:
+			log.error(f"User {userid} for guild {guildid} did not appear in the DB")
+			res = (0,)
+	elif fetch == 'all':
+		res = c.fetchall()
+		if res is None:
+			log.error(f"User {userid} for guild {guildid} did not appear in the DB")
+			res = (0,)
+	r = res[0] if fetch == 'one' else res
+	log.debug(f"get_user_{c_name}({userid}, {guildid}) is returning {r}")
+	c.close()
+	return r
+
+
+def get_vctime(userid: int, guildid: int):
+	"""
+	Counts the number of voice chat awarded transactions
+	"""
+	c = db.cursor()
+	c.execute("SELECT COUNT(*) FROM transactions WHERE type=5 and recipient=%s and guild_id=%s", (userid, guildid))
+	return c.fetchone()
+
+
+def get_leaderboard(user_id):
+	"""
+	Gets list of total users and iterates through the list to find user.
+	and returns index position +1
+	:return int:
+	"""
+	try:
+		c = db.cursor()
+		c.execute("SELECT * FROM users ORDER BY balance DESC")
+		pos = [i for i, j in enumerate(c.fetchall()) if int(j[0]) == int(user_id)]
+		result = int(pos[0] + 1)
+		c.close()
+	except Exception as e:
+		result = 0
+		log.error(e)
+	return result
 
 
 db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)

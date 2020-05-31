@@ -1,13 +1,13 @@
+import logging
 import os
 import random
-import logging
 
 from discord import Embed
 from discord import File
 from discord.ext import commands
 
-
 log = logging.getLogger(__name__)
+
 
 class Welcome(commands.Cog):
 	"""Displays Welcome Memes"""
@@ -15,6 +15,7 @@ class Welcome(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.loc = "data/welcome_imgs/"
+		self.bot.events[__name__] = {}
 
 	@commands.Cog.listener(name='on_member_join')
 	async def on_member_join(self, member):
@@ -32,9 +33,12 @@ class Welcome(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Welcome(bot))
-	log.info(__name__, " loaded!")
+	log.info(__name__ + " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	log.info(__name__, " unloaded!")
+
+	# Remove Events
+	bot.event.pop(__name__, None)
+	log.info(__name__ + " unloaded!")

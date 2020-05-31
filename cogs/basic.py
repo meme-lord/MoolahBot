@@ -1,5 +1,6 @@
-from discord.ext import commands
 import logging
+
+from discord.ext import commands
 
 log = logging.getLogger(__name__)
 
@@ -7,6 +8,7 @@ log = logging.getLogger(__name__)
 class Basic(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
+		self.bot.events[__name__] = {}
 
 	@commands.command()
 	async def ping(self, ctx):
@@ -19,9 +21,12 @@ class Basic(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(Basic(bot))
-	log.info(__name__, " loaded!")
+	log.info(__name__ + " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	log.info(__name__, " unloaded!")
+
+	# Remove Events
+	bot.event.pop(__name__, None)
+	log.info(__name__ + " unloaded!")

@@ -17,6 +17,7 @@ class CoinToss(commands.Cog):
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.bot.events[__name__] = {}
 		self.outcomes = ['heads', 'tails']  # could have other sets of outcomes? roulette anyone?
 
 	@commands.command()
@@ -37,9 +38,12 @@ class CoinToss(commands.Cog):
 				# roll back the other transaction
 				database.execute_transaction(2, ctx.author.id, 0, ctx.guild.id, amount)
 				return
-		await ctx.send(f"A cointoss has started between {ctx.author.mention} and {opponent.mention}. {opponent.mention} choose your side, heads or tails?")
+		await ctx.send(
+			f"A cointoss has started between {ctx.author.mention} and {opponent.mention}. {opponent.mention} choose your side, heads or tails?")
 		try:
-			msg = await self.bot.wait_for('message', check=(lambda x: x.author.id is opponent.id and x.channel is ctx.channel), timeout=10)
+			msg = await self.bot.wait_for('message',
+										  check=(lambda x: x.author.id is opponent.id and x.channel is ctx.channel),
+										  timeout=10)
 		except asyncio.TimeoutError:
 			await ctx.send("Cointoss timed out.")
 			# roll back the other transactions
@@ -61,9 +65,12 @@ class CoinToss(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(CoinToss(bot))
-	log.info(__name__, " loaded!")
+	log.info(__name__ + " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	log.info(__name__, " unloaded!")
+
+	# Remove Events
+	bot.event.pop(__name__, None)
+	log.info(__name__ + " unloaded!")

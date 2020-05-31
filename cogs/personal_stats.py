@@ -1,6 +1,6 @@
 import logging
 import random
-from datetime import timedelta
+from datetime import timedelta, datetime
 from io import BytesIO
 
 import matplotlib
@@ -9,7 +9,7 @@ from discord import File
 from discord.ext import commands
 from matplotlib import pyplot as plt
 
-from database import get_user_balance
+from database import get_user_balance, get_property, get_vctime, get_leaderboard
 
 log = logging.getLogger(__name__)
 
@@ -17,10 +17,16 @@ log = logging.getLogger(__name__)
 class PersonalStats(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
+		self.bot.events[__name__] = {}
 		self.black = 'data/personal_stats/black.png'
 		# Load Fonts
 		self.fnt = ImageFont.truetype('data//fonts//Cuadra-Bold.otf', 70)
 		self.fnt2 = ImageFont.truetype('data//fonts//Cuadra-Bold.otf', 20)
+
+	@commands.command()
+	async def test(self, ctx):
+		x = get_vctime(ctx.author.id, ctx.guild.id)
+		await ctx.send(x)
 
 	@commands.command()
 	async def profile(self, ctx):
@@ -41,22 +47,35 @@ class PersonalStats(commands.Cog):
 			draw.text(((W - w) / 2, (H - h) / 1.8), moolahtxt, font=self.fnt, fill=(255, 255, 0))
 
 			# VC TIME
-			vctime = str(timedelta(minutes=22))
+			vctime = str(timedelta(minutes=get_vctime(ctx.author.id, ctx.guild.id)[0]))
 			w1, h1 = draw.textsize(vctime, font=self.fnt2)
 			draw.text(((W - w1) / 10.5, (H - h1) / 7.5), vctime[:-3], font=self.fnt2, fill=(255, 255, 0))
 
-			# MESSAGES SENT
-			msg_sent = str(21312)
+			# Username Text
+			usrtxt = str(ctx.author.name)
+			w, h = draw.textsize(usrtxt, font=self.fnt2)
+			draw.text(((W - w) / 2, (H - h) / 2.6), usrtxt, font=self.fnt2, fill=(255, 255, 0))
+
+			# LeaderBoard Position
+			pos = get_leaderboard(ctx.author.id)
+			msg_sent = str(pos)
 			w1, h1 = draw.textsize(msg_sent, font=self.fnt2)
 			draw.text((int((W - w1) / 1.1), (H - h1) / 7.5), msg_sent, font=self.fnt2, fill=(255, 255, 0))
 
 			# Lifetime Moolah
-			lt_moolah = clean_money(231231)
+			lt_moolah = clean_money(get_property("lifetime_moolah", ctx.author.id, ctx.guild.id))
 			w1, h1 = draw.textsize(lt_moolah, font=self.fnt2)
 			draw.text(((W - w1) / 10.5, (H - h1) / 2.9), lt_moolah, font=self.fnt2, fill=(255, 255, 0))
 
 			# Server Join time
-			jtime = str(ctx.author.joined_at.strftime("%d-%b-%y  %I:%M"))
+			try:
+				jtime = str(
+					datetime.fromtimestamp(get_property('user_initialise_time', ctx.author.id, ctx.guild.id)).strftime(
+						"%d-%b-%y  %I:%M"))
+			except Exception as e:
+				log.error(e)
+				# Use Discord Default
+				jtime = str(ctx.author.joined_at.strftime("%d-%b-%y  %I:%M"))
 			w1, h1 = draw.textsize(jtime, font=self.fnt2)
 			draw.text(((W - w1) / 1.06, (H - h1) / 2.9), jtime, font=self.fnt2, fill=(255, 255, 0))
 
@@ -124,9 +143,12 @@ def m_balance_graph():
 
 def setup(bot):
 	bot.add_cog(PersonalStats(bot))
-	print(__name__, " loaded!")
+	log.info(__name__ + " loaded!")
 
 
 def teardown(bot):
 	# Actions before unloading
-	print(__name__, " unloaded!")
+
+	# Remove Events
+	bot.event.pop(__name__, None)
+	log.info(__name__ + " unloaded!")
