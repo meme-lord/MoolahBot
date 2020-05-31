@@ -3,3 +3,4 @@ PrettyTable
 mysqlclient
 discord
 matplotlib
+emoji
