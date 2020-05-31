@@ -4,7 +4,7 @@ import logging
 from discord.ext import commands
 
 from database import get_leaderboard
-from lib.events import restart
+from lib.events import on_vc_moolah_update
 
 log = logging.getLogger(__name__)
 
@@ -15,29 +15,14 @@ class Achievements(commands.Cog):
 		self.bot.events[__name__] = {}
 		asyncio.create_task(self.check_pos_leaderboard())
 
-	@restart
-	async def check_pos_leaderboard(self):
-		onvc = self.bot.events['cogs.moolah']['moolahVoice']
-		await onvc.wait()
-		onvc.clear()
-		var = onvc.arg
-		# TODO get 1st on the topdog leaderboard
-		if int(get_leaderboard(var)) == 1:
-			user = self.bot.get_user(int(var))
-			channel = await user.create_dm()
-			await channel.send('Congrats you are the Topdog')
-
-		elif int(get_leaderboard(var)) <= 10:
-			# TODO enter top 10
-			user = self.bot.get_user(int(var))
-			channel = await user.create_dm()
-			await channel.send('Congrats you are in the top ten!')
-
-		elif int(get_leaderboard(var)) <= 100:
-			# TODO enter top 100
-			user = self.bot.get_user(int(var))
-			channel = await user.create_dm()
-			await channel.send('Congrats you are in the top hundred!')
+	@on_vc_moolah_update
+	async def check_pos_leaderboard(self, var):
+		for user in var:
+			position = int(get_leaderboard(user.id))
+			if position in range(1, 100):  # if position in top 100
+				user = self.bot.get_user(int(user.id))
+				channel = await user.create_dm()
+				await channel.send(f'Congrats!, you are No.{position} in Topdog!')
 
 	async def hr_vc(self):
 		# TODO 100hrs in VC

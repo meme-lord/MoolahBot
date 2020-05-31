@@ -55,9 +55,8 @@ class Moolah(commands.Cog):
 					real_p = [x for x in channel.members if x.bot is False]
 					if len(real_p) > 1:
 						for discord_id in real_p:
-							print(discord_id, discord_id.id)
-							onup.set(discord_id.id)
 							ids.add((discord_id, guild.id))
+							await onup.set([discord_id])
 			database.vc_moolah_earned(ids, config.vc_moolah)
 			# clean up message dict
 			five_mins_ago = datetime.datetime.now(datetime.timezone.utc) - self.time_between_moolah_msgs
