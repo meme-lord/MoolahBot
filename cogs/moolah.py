@@ -30,10 +30,17 @@ class Moolah(commands.Cog):
 		x.align["Name"] = 'l'
 		x.align["Moolah"] = 'l'
 		position = 1
-		for entry in entries:
-			member = await ctx.guild.fetch_member(entry[0])
-			x.add_row([position, member.display_name, entry[1]])
+		author_in_top10 = False
+		for discord_id, balance in entries:
+			if discord_id == ctx.author.id:
+				author_in_top10 = True
+			member = await ctx.guild.fetch_member(discord_id)
+			x.add_row([position, member.display_name, balance])
 			position += 1
+		if not author_in_top10:
+			x.add_row(['...', '...', '...'])
+			position, balance = database.get_leaderboard_position(ctx.author.id, ctx.guild.id)
+			x.add_row([position, ctx.author.display_name, balance])
 		await ctx.send(f"```{x}```")
 
 	@commands.Cog.listener(name='on_message')
@@ -48,7 +55,7 @@ class Moolah(commands.Cog):
 		onup = self.bot.events[__name__]['moolahVoice']
 		await self.bot.wait_until_ready()
 		while not self.bot.is_closed():
-			log.info("Start of moolah loop")
+			log.debug("Start of moolah loop")
 			# award the vc moolah
 			ids = set()
 			for guild in self.bot.guilds:
@@ -64,7 +71,7 @@ class Moolah(commands.Cog):
 			five_mins_ago = datetime.datetime.now(datetime.timezone.utc) - self.time_between_moolah_msgs
 			# this dict loop runs every minute maybe impact can be reduced?
 			for key, value in self.recent_msg_tracking:
-				if (value - five_mins_ago) > self.time_between_moolah_msgs:
+				if value < five_mins_ago:
 					self.recent_msg_tracking.pop(key, None)
 			await asyncio.sleep(config.vc_time)
 

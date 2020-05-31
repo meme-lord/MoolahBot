@@ -83,7 +83,7 @@ def add_user(discord_id: int, guild_id: int):
 	if discord_id not in member_dict[guild_id]:
 		c = db.cursor()
 		c.execute(
-			"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0, UNIX_TIMESTAMP())",
+			"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0)",
 			(discord_id, guild_id))
 		member_dict[guild_id] = discord_id
 
@@ -100,7 +100,7 @@ def add_users(discord_ids: List[int], guild_id: int):
 
 	c = db.cursor()
 	c.executemany(
-		"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0, UNIX_TIMESTAMP())",
+		"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0)",
 		new_users)
 	member_dict[guild_id].update(new_users)
 
@@ -159,16 +159,19 @@ def get_vctime(userid: int, guildid: int):
 	return res[0]
 
 
-def get_leaderboard(user_id):
+def get_leaderboard_position(user_id, guild_id):
 	"""
 	Gets list of total users and iterates through the list to find user.
 	and returns index position +1
 	:return int:
 	"""
 	c = db.cursor()
-	c.execute("SELECT * FROM users ORDER BY balance DESC")
-	pos = [i for i, j in enumerate(c.fetchall()) if int(j[0]) == int(user_id)]
-	result = int(pos[0] + 1)
+	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s ORDER BY balance DESC", (guild_id,))
+	pos = list(filter(lambda x: int(x[0]) == int(user_id), c.fetchall()))
+	result = (0, 0)
+	if pos:
+		pos = pos[0]
+		result = (int(pos[0]), int(pos[1]))
 	c.close()
 
 	return result

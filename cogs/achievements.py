@@ -3,7 +3,7 @@ import logging
 
 from discord.ext import commands
 
-from database import get_leaderboard
+from database import get_leaderboard_position
 from lib.events import on_vc_moolah_update
 
 log = logging.getLogger(__name__)
@@ -20,10 +20,11 @@ class Achievements(commands.Cog):
 		if var is None:
 			log.error(f"check_pos_leaderboard was called with None var")
 			return
+		log.debug(var)
 		for user in var:
-			position = int(get_leaderboard(user.id))
+			position, _ = int(get_leaderboard_position(user)) #TODO: NEED GUILD ID HERE
 			if position in range(1, 100):  # if position in top 100
-				user = self.bot.get_user(int(user.id))
+				user = self.bot.get_user(int(user))
 				channel = await user.create_dm()
 				await channel.send(f'Congrats!, you are No.{position} in Topdog!')
 
@@ -55,7 +56,7 @@ class Achievements(commands.Cog):
 
 
 def setup(bot):
-	bot.add_cog(Achievements(bot))
+	#bot.add_cog(Achievements(bot))
 	log.info(f"{__name__} loaded!")
 
 

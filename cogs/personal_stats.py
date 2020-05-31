@@ -5,11 +5,12 @@ from io import BytesIO
 
 import matplotlib
 from PIL import Image, ImageDraw, ImageFont
+import discord
 from discord import File
 from discord.ext import commands
 from matplotlib import pyplot as plt
 
-from database import get_user_balance, get_property, get_vctime, get_leaderboard
+from database import get_user_balance, get_property, get_vctime, get_leaderboard_position
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +25,9 @@ class PersonalStats(commands.Cog):
 		self.fnt2 = ImageFont.truetype('data//fonts//Cuadra-Bold.otf', 20)
 
 	@commands.command()
-	async def profile(self, ctx):
+	async def profile(self, ctx, person: discord.Member = None):
+		if person is None:
+			person = ctx.author
 		# Img dimensions
 		W, H = (600, 600)
 
@@ -37,33 +40,33 @@ class PersonalStats(commands.Cog):
 			draw = ImageDraw.Draw(img)
 
 			# Moolah Text
-			moolahtxt = clean_money(get_user_balance(ctx.author.id, ctx.guild.id))
+			moolahtxt = clean_money(get_user_balance(person.id, ctx.guild.id))
 			w, h = draw.textsize(moolahtxt, font=self.fnt)
 			draw.text(((W - w) / 2, (H - h) / 1.8), moolahtxt, font=self.fnt, fill=(255, 255, 0))
 
 			# VC TIME
-			vctime = str(timedelta(minutes=get_vctime(ctx.author.id, ctx.guild.id)))
+			vctime = str(timedelta(minutes=get_vctime(person.id, ctx.guild.id)))
 			w1, h1 = draw.textsize(vctime, font=self.fnt2)
 			draw.text(((W - w1) / 10.5, (H - h1) / 7.5), vctime[:-3], font=self.fnt2, fill=(255, 255, 0))
 
 			# Username Text
-			usrtxt = str(ctx.author.name)
+			usrtxt = str(person.name)
 			w, h = draw.textsize(usrtxt, font=self.fnt2)
 			draw.text(((W - w) / 2, (H - h) / 2.6), usrtxt, font=self.fnt2, fill=(255, 255, 0))
 
 			# LeaderBoard Position
-			pos = get_leaderboard(ctx.author.id)
+			pos,_ = get_leaderboard_position(person.id, ctx.guild.id)
 			msg_sent = str(pos)
 			w1, h1 = draw.textsize(msg_sent, font=self.fnt2)
 			draw.text((int((W - w1) / 1.1), (H - h1) / 7.5), msg_sent, font=self.fnt2, fill=(255, 255, 0))
 
 			# Lifetime Moolah
-			lt_moolah = clean_money(get_property("lifetime_moolah", ctx.author.id, ctx.guild.id))
+			lt_moolah = clean_money(get_property("lifetime_moolah", person.id, ctx.guild.id))
 			w1, h1 = draw.textsize(lt_moolah, font=self.fnt2)
 			draw.text(((W - w1) / 10.5, (H - h1) / 2.9), lt_moolah, font=self.fnt2, fill=(255, 255, 0))
 
 			# Use Discord Default
-			jtime = str(ctx.author.joined_at.strftime("%d-%b-%y  %I:%M"))
+			jtime = str(person.joined_at.strftime("%d-%b-%y  %I:%M"))
 			w1, h1 = draw.textsize(jtime, font=self.fnt2)
 			draw.text(((W - w1) / 1.06, (H - h1) / 2.9), jtime, font=self.fnt2, fill=(255, 255, 0))
 
@@ -76,25 +79,25 @@ class PersonalStats(commands.Cog):
 			img.paste(graph, (-45, 390))
 
 			# Paste Profile Pic
-			profpic = await self.get_profile_pic(ctx)
+			profpic = await self.get_profile_pic(person)
 			img.paste(profpic, (240, 50))
 			bytIO2.seek(0)
 			img.save(bytIO2, format='png')
 
 			# Send and Close Buffers
 			bytIO2.seek(0)
-			await ctx.send(file=File(bytIO2, filename=f"{ctx.author.id}.png"))
+			await ctx.send(file=File(bytIO2, filename=f"{person.id}.png"))
 		except Exception as e:
 			log.error(e)
 		finally:
 			bytIO2.close()
 
-	async def get_profile_pic(self, ctx):
+	async def get_profile_pic(self, person):
 		"""
 		Downloads Discord profile pic and loads it
 		:returns ImageObj , buffer:
 		"""
-		f = BytesIO(await ctx.author.avatar_url_as(size=128).read())
+		f = BytesIO(await person.avatar_url_as(size=128).read())
 		profpic = Image.open(f)
 		return profpic
 

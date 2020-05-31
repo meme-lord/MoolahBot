@@ -18,7 +18,7 @@ class usernotFound(Exception):
 			return "User [{}] not found!.\n Did u mean {} ?.".format(self.muser, self.match)
 
 
-async def search(ctx, member, type='users'):
+async def search(ctx, member):
 	member = str(member).lower()
 	memberlist = ctx.guild.members
 	name_list = [(str(x.name).lower(), str(x.nick).lower(), x) for x in ctx.guild.members]
