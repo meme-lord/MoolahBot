@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 class EventV2(asyncio.Event):
 	def __init__(self, *args, **kwargs):
 		super().__init__()
-		self.arg = 'start'
+		self.arg = None
 
 	def set(self, val):
 		"""Set the internal flag to true. All coroutines waiting for it to
@@ -23,14 +23,11 @@ class EventV2(asyncio.Event):
 					fut.set_result(True)
 
 
-def on_voice_moolah(f):
+def restart(f):
 	# Note this decorator does not flush args immediately it works like a queue.
 	@functools.wraps(f)
 	async def wrapper(self, *args, **kwargs):
-		onvcm = self.bot.events['cogs.moolah']['moolahVoice']
-		ret = f(self, *args, **kwargs, id=onvcm.arg)
-		await onvcm.wait()
-		onvcm.clear()
+		ret = f(self, *args, **kwargs)
 		x = await ret
 		asyncio.create_task(wrapper(self, *args, **kwargs))
 		return x

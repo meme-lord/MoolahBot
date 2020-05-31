@@ -24,11 +24,6 @@ class PersonalStats(commands.Cog):
 		self.fnt2 = ImageFont.truetype('data//fonts//Cuadra-Bold.otf', 20)
 
 	@commands.command()
-	async def test(self, ctx):
-		x = get_vctime(ctx.author.id, ctx.guild.id)
-		await ctx.send(x)
-
-	@commands.command()
 	async def profile(self, ctx):
 		# Img dimensions
 		W, H = (600, 600)

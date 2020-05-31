@@ -24,11 +24,6 @@ class Moolah(commands.Cog):
 		self.time_between_moolah_msgs = datetime.timedelta(seconds=config.time_between_msg_moolah)
 
 	@commands.command()
-	async def fire(self, ctx, input):
-		onup = self.bot.events[__name__]['moolahVoice']
-		onup.set(input)
-
-	@commands.command()
 	async def topdog(self, ctx):
 		entries = database.topdog(ctx.guild.id)
 		x = PrettyTable(["Position", "Name", "Moolah"])
@@ -58,7 +53,7 @@ class Moolah(commands.Cog):
 			for guild in self.bot.guilds:
 				for channel in guild.voice_channels:
 					real_p = [x for x in channel.members if x.bot is False]
-					if len(real_p) > 0:
+					if len(real_p) > 1:
 						for discord_id in real_p:
 							print(discord_id, discord_id.id)
 							onup.set(discord_id.id)
