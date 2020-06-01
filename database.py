@@ -85,7 +85,7 @@ def add_user(discord_id: int, guild_id: int):
 		c.execute(
 			"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0)",
 			(discord_id, guild_id))
-		member_dict[guild_id] = discord_id
+		member_dict[guild_id].add(discord_id)
 
 
 def add_users(discord_ids: List[int], guild_id: int):
