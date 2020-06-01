@@ -167,13 +167,15 @@ def get_leaderboard_position(user_id, guild_id):
 	"""
 	c = db.cursor()
 	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s ORDER BY balance DESC", (guild_id,))
-	pos = list(filter(lambda x: int(x[0]) == int(user_id), c.fetchall()))
-	result = (0, 0)
-	if pos:
-		pos = pos[0]
-		result = (int(pos[0]), int(pos[1]))
+	pos = 1
+	user_id = int(user_id)
+	result = (0,0)
+	for id, balance in c.fetchall():
+		if int(id) == user_id:
+			result = (int(pos), int(balance))
+			break
+		pos += 1
 	c.close()
-
 	return result
 
 
