@@ -97,7 +97,7 @@ class PersonalStats(commands.Cog):
 		Downloads Discord profile pic and loads it
 		:returns ImageObj , buffer:
 		"""
-		f = BytesIO(await person.avatar_url_as(size=128).read())
+		f = BytesIO(await person.avatar_url_as(size=128, format='png').read())
 		profpic = Image.open(f)
 		return profpic
 
