@@ -42,3 +42,41 @@ def on_vc_moolah_update(f):
 		return x
 
 	return wrapper
+
+
+def on_cointoss_end(f):
+	"""
+	This decorator wraps a function it is attached to to wait for the event to fire
+	It also restarts the function when it is finished to keep listening.
+	"""
+
+	@functools.wraps(f)
+	async def wrapper(self, *args, **kwargs):
+		onvc = self.bot.events['cogs.cointoss']['cointoss']
+		await onvc.wait()
+		onvc.clear()
+		ret = f(self, *args, **kwargs, var=onvc.arg)
+		x = await ret
+		asyncio.create_task(wrapper(self, *args, **kwargs))
+		return x
+
+	return wrapper
+
+
+def on_slots_end(f):
+	"""
+	This decorator wraps a function it is attached to to wait for the event to fire
+	It also restarts the function when it is finished to keep listening.
+	"""
+
+	@functools.wraps(f)
+	async def wrapper(self, *args, **kwargs):
+		onvc = self.bot.events['cogs.slots']['slots']
+		await onvc.wait()
+		onvc.clear()
+		ret = f(self, *args, **kwargs, var=onvc.arg)
+		x = await ret
+		asyncio.create_task(wrapper(self, *args, **kwargs))
+		return x
+
+	return wrapper

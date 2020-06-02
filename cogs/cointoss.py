@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 
 import database
+from lib.events import EventV2
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ class CoinToss(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.bot.events[__name__] = {}
+		self.bot.events[__name__]['cointoss'] = EventV2()
 		self.outcomes = ['heads', 'tails']  # could have other sets of outcomes? roulette anyone?
 
 	@commands.command()
@@ -53,12 +55,16 @@ class CoinToss(commands.Cog):
 		outcome = secrets.choice(self.outcomes)  # we need secure randomness!
 		if msg.content.lower() in self.outcomes:
 			winner = ctx.author
+			loser = opponent
 			if msg.content.lower() is outcome:
 				winner = opponent
+				loser = ctx.author
 			await ctx.send(f"The coin landed on {outcome}. {winner.mention} won {amount} Moolah!")
 			success, err_msg = database.execute_transaction(2, winner.id, 0, ctx.guild.id, amount * 2)
 			if not success:
 				await ctx.send(err_msg.format(sender='0'))
+			on_cointoss_end = self.bot.events[__name__]['cointoss']
+			on_cointoss_end.set({'winner': winner.id, 'loser': loser.id, 'guild': ctx.guild.id})
 		else:
 			await ctx.send("Invalid choice")
 

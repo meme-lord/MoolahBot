@@ -5,6 +5,7 @@ import secrets
 from discord.ext import commands
 
 import database
+from lib.events import EventV2
 
 log = logging.getLogger(__name__)
 
@@ -13,6 +14,7 @@ class Slots(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.bot.events[__name__] = {}
+		self.bot.events[__name__]['slots'] = EventV2()
 
 	@commands.command()
 	async def slots(self, ctx, amount):
@@ -69,6 +71,8 @@ class Slots(commands.Cog):
 				won_something = True
 		if not won_something:
 			await ctx.send("Alas luck wasn't on your side")
+		on_slot_end = self.bot.events[__name__]['slots']
+		on_slot_end.set((ctx.author.id, ctx.guild.id))
 
 
 def setup(bot):

@@ -96,3 +96,12 @@ def emoji_norm(txt, emoji):
 	for x in ind:
 		red[x] = "_"
 	return "".join(red)
+
+
+async def send_dm(bot, userid, message):
+	"""
+	Send a Dm to the user
+	"""
+	user = bot.get_user(userid)
+	channel = await user.create_dm()
+	await channel.send(message)

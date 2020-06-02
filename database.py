@@ -152,7 +152,19 @@ def get_vctime(userid: int, guildid: int):
 	Counts the number of voice chat awarded transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(*) FROM transactions WHERE type=5 and recipient=%s and guild_id=%s", (userid, guildid))
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=5 and recipient=%s and guild_id=%s", (userid, guildid))
+	res = c.fetchone()
+	if res is None:
+		return 0
+	return res[0]
+
+
+def get_slot_count(userid: int, guildid: int):
+	"""
+	Counts the number of slot transactions
+	"""
+	c = db.cursor()
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=6 and recipient=%s and guild_id=%s", (userid, guildid))
 	res = c.fetchone()
 	if res is None:
 		return 0
@@ -169,7 +181,7 @@ def get_leaderboard_position(user_id, guild_id):
 	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s ORDER BY balance DESC", (guild_id,))
 	pos = 1
 	user_id = int(user_id)
-	result = (0,0)
+	result = (0, 0)
 	for id, balance in c.fetchall():
 		if int(id) == user_id:
 			result = (int(pos), int(balance))
@@ -177,6 +189,41 @@ def get_leaderboard_position(user_id, guild_id):
 		pos += 1
 	c.close()
 	return result
+
+
+def get_achievements(user_id: int, guild_id: int):
+	c = db.cursor()
+	c.execute("SELECT * FROM achievements.user_achievements WHERE discord_id=%s and guild_id=%s", (user_id, guild_id))
+	c.close()
+	return c.fetchall()
+
+
+def get_achievements_types():
+	data = {}
+	c = db.cursor()
+	c.execute("SELECT * FROM achievements.achievements_types")
+	result = c.fetchall()
+	for item in result:
+		data[item[0]] = {'name': item[1], 'description': item[2]}
+	return data
+
+
+async def set_achievement(user_id: int, guild_id: int, achievement_type: int):
+	c = db.cursor()
+	c.execute(
+		"INSERT INTO user_achievements (discord_id,guild_id, achievement) VALUES (%s, %s, %s)",
+		(user_id, guild_id, achievement_type))
+	c.close()
+
+
+def has_achievement(user_id: int, guild_id: int, achievement_type: int):
+	c = db.cursor()
+	c.execute(
+		"SELECT EXISTS(SELECT * FROM achievements.user_achievements WHERE discord_id=%s and guild_id=%s and achievement=%s)",
+		(user_id, guild_id, achievement_type))
+	result = c.fetchone()
+	x = False if int(result[0]) == 0 else True
+	return x
 
 
 db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
