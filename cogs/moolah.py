@@ -78,7 +78,7 @@ class Moolah(commands.Cog):
 			await asyncio.sleep(config.vc_time)
 
 
-def eligible_for_moolah(self, person):
+def eligible_for_moolah(person):
 	return person.bot is False and not person.deafened
 
 
