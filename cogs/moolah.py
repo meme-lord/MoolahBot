@@ -68,7 +68,7 @@ class Moolah(commands.Cog):
 				database.vc_moolah_earned(ids, config.vc_moolah)
 				await onup.set(list(map(lambda x: x, ids)))
 			# clean up message dict
-			five_mins_ago = datetime.datetime.now() - self.time_between_moolah_msgs
+			five_mins_ago = datetime.datetime.utcnow() - self.time_between_moolah_msgs
 			# this dict loop runs every minute maybe impact can be reduced?
 			for key, value in self.recent_msg_tracking.copy().items():
 				if value < five_mins_ago:
