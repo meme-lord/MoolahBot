@@ -70,7 +70,7 @@ class Moolah(commands.Cog):
 			# clean up message dict
 			five_mins_ago = datetime.datetime.now() - self.time_between_moolah_msgs
 			# this dict loop runs every minute maybe impact can be reduced?
-			for key, value in self.recent_msg_tracking.items():
+			for key, value in self.recent_msg_tracking.copy().items():
 				if value < five_mins_ago:
 					self.recent_msg_tracking.pop(key, None)
 			await asyncio.sleep(config.vc_time)

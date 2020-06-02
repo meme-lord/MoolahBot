@@ -41,6 +41,9 @@ class MyClient(commands.Bot):
 	async def on_member_join(self, member):
 		database.add_user(member.id, member.guild.id)
 
+	async def on_guild_join(self, guild):
+		database.add_users(list(map(lambda x: x.id, list(filter(lambda x: not x.bot, guild.members)))),guild.id)
+
 
 if __name__ == "__main__":
 	bot = MyClient(command_prefix='!')
