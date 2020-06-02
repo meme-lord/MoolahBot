@@ -178,7 +178,7 @@ def get_leaderboard_position(user_id, guild_id):
 	:return int:
 	"""
 	c = db.cursor()
-	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s ORDER BY balance DESC", (guild_id,))
+	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC", (guild_id,))
 	pos = 1
 	user_id = int(user_id)
 	result = (0, 0)
