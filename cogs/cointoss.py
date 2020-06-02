@@ -38,7 +38,7 @@ class CoinToss(commands.Cog):
 			if not success:
 				await ctx.send(err_msg.format(sender={opponent.mention}))
 				# roll back the other transaction
-				database.execute_transaction(2, ctx.author.id, 0, ctx.guild.id, amount)
+				database.execute_transaction(7, ctx.author.id, 0, ctx.guild.id, amount)
 				return
 		await ctx.send(
 			f"A cointoss has started between {ctx.author.mention} and {opponent.mention}. {opponent.mention} choose your side, heads or tails?")
@@ -49,8 +49,8 @@ class CoinToss(commands.Cog):
 		except asyncio.TimeoutError:
 			await ctx.send("Cointoss timed out.")
 			# roll back the other transactions
-			database.execute_transaction(2, ctx.author.i, 0, ctx.guild.id, amount)
-			database.execute_transaction(2, opponent.id, 0, ctx.guild.id, amount)
+			database.execute_transaction(7, ctx.author.id, 0, ctx.guild.id, amount)
+			database.execute_transaction(7, opponent.id, 0, ctx.guild.id, amount)
 			return
 		outcome = secrets.choice(self.outcomes)  # we need secure randomness!
 		if msg.content.lower() in self.outcomes:
@@ -60,13 +60,15 @@ class CoinToss(commands.Cog):
 				winner = opponent
 				loser = ctx.author
 			await ctx.send(f"The coin landed on {outcome}. {winner.mention} won {amount} Moolah!")
-			success, err_msg = database.execute_transaction(2, winner.id, 0, ctx.guild.id, amount * 2)
+			success, err_msg = database.execute_transaction(3, winner.id, 0, ctx.guild.id, amount * 2)
 			if not success:
 				await ctx.send(err_msg.format(sender='0'))
 			on_cointoss_end = self.bot.events[__name__]['cointoss']
-			on_cointoss_end.set({'winner': winner.id, 'loser': loser.id, 'guild': ctx.guild.id})
+			await on_cointoss_end.set({'winner': winner.id, 'loser': loser.id, 'guild': ctx.guild.id})
 		else:
 			await ctx.send("Invalid choice")
+			database.execute_transaction(7, ctx.author.id, 0, ctx.guild.id, amount)
+			database.execute_transaction(7, opponent.id, 0, ctx.guild.id, amount)
 
 
 def setup(bot):

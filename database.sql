@@ -31,7 +31,8 @@ CREATE TABLE transaction_types
 INSERT INTO transaction_types
 VALUES (1, 'user_to_user', 'A transaction between two users'),
        (2, 'cointoss_escrow', 'Balance kept in escrow for a cointoss bet'),
-       (3, 'cointoss', 'Winnings or losses from cointoss bet'),
+       (3, 'cointoss', 'Winnings from cointoss bet'),
        (4, 'message_moolah', 'Moolah earned for messages'),
        (5, 'vc_moolah', 'Moolah earned for voice chat'),
-       (6, 'slots', 'Winnings and payment for slots');
+       (6, 'slots', 'Winnings and payment for slots'),
+       (7, 'cointoss_escrow_refund', 'Balance kept in escrow for a cointoss bet');

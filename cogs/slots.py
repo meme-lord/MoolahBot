@@ -52,7 +52,6 @@ class Slots(commands.Cog):
 		log.info(f"Result: {result}")
 		for item in set(result):
 			count = result.count(item)
-			log.info(f"{item} appears {count} times")
 			if count == 2:
 				pool = amount * items[item][0]
 				await ctx.send(f"You won {pool} moolah!")
@@ -72,7 +71,7 @@ class Slots(commands.Cog):
 		if not won_something:
 			await ctx.send("Alas luck wasn't on your side")
 		on_slot_end = self.bot.events[__name__]['slots']
-		on_slot_end.set((ctx.author.id, ctx.guild.id))
+		await on_slot_end.set((ctx.author.id, ctx.guild.id))
 
 
 def setup(bot):

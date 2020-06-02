@@ -51,6 +51,8 @@ class Moolah(commands.Cog):
 			self.recent_msg_tracking[(message.author.id, message.guild.id)] = message.created_at
 			database.moolah_earned(message.author.id, message.guild.id, config.msg_moolah)
 
+
+
 	async def moolah_loop(self):
 		onup = self.bot.events[__name__]['moolahVoice']
 		await self.bot.wait_until_ready()
@@ -60,7 +62,7 @@ class Moolah(commands.Cog):
 			ids = set()
 			for guild in self.bot.guilds:
 				for channel in guild.voice_channels:
-					real_p = [x for x in channel.members if x.bot is False]
+					real_p = list(filter(eligible_for_moolah, channel.members))
 					if len(real_p) > 1:
 						for member in real_p:
 							ids.add((member.id, guild.id))
@@ -74,6 +76,10 @@ class Moolah(commands.Cog):
 				if value < five_mins_ago:
 					self.recent_msg_tracking.pop(key, None)
 			await asyncio.sleep(config.vc_time)
+
+
+def eligible_for_moolah(self, person):
+	return person.bot is False and not person.deafened
 
 
 def setup(bot):

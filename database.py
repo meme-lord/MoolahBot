@@ -182,13 +182,10 @@ def get_leaderboard_position(user_id, guild_id):
 	pos = 1
 	user_id = int(user_id)
 	result = (0, 0)
-	for id, balance in c.fetchall():
-		if int(id) == user_id:
-			result = (int(pos), int(balance))
-			break
-		pos += 1
-	c.close()
-	return result
+	people = c.fetchall()
+	pos = [x[0] for x in people].index(user_id)
+	balance = people[pos][1]
+	return pos+1, balance
 
 
 def get_achievements(user_id: int, guild_id: int):
