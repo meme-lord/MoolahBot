@@ -3,6 +3,7 @@ from datetime import timedelta
 from io import BytesIO
 
 import matplotlib
+import matplotlib.ticker as ticker
 from PIL import Image, ImageDraw, ImageFont
 from discord import File, Member
 from discord.ext import commands
@@ -30,7 +31,7 @@ class PersonalStats(commands.Cog):
 		W, H = (600, 600)
 
 		# Buffers for storing images in memory
-		bytIO2 = BytesIO()
+		buffer_1 = BytesIO()
 		# Load Background Image and create draw object
 		try:
 			with open(self.black, 'rb') as f:
@@ -70,25 +71,25 @@ class PersonalStats(commands.Cog):
 
 			# Create Moolah Graph
 			graph = m_balance_graph(person.id, ctx.guild.id)
-			graph.savefig(bytIO2)
-			bytIO2.seek(0)
-			graph = Image.open(bytIO2)
+			graph.savefig(buffer_1)
+			buffer_1.seek(0)
+			graph = Image.open(buffer_1)
 
 			img.paste(graph, (-45, 390))
 
 			# Paste Profile Pic
 			profpic = await self.get_profile_pic(person)
 			img.paste(profpic, (240, 50))
-			bytIO2.seek(0)
-			img.save(bytIO2, format='png')
+			buffer_1.seek(0)
+			img.save(buffer_1, format='png')
 
 			# Send and Close Buffers
-			bytIO2.seek(0)
-			await ctx.send(file=File(bytIO2, filename=f"{person.id}.png"))
+			buffer_1.seek(0)
+			await ctx.send(file=File(buffer_1, filename=f"{person.id}.png"))
 		except Exception as e:
 			log.error(e)
 		finally:
-			bytIO2.close()
+			buffer_1.close()
 
 	async def get_profile_pic(self, person):
 		"""
@@ -118,18 +119,32 @@ def clean_money(amount):
 			return str(amount)
 
 
+@ticker.FuncFormatter
+def clean_formatter(x, pos):
+	return clean_money(x)
+
+
 def m_balance_graph(user_id: int, guild_id: int):
 	"""
 	Creates a linegraph for moolah balance over a time period.
 	"""
 	plt.style.use(['dark_background'])
 	matplotlib.rcParams['axes.facecolor'] = 'black'
-	matplotlib.rc('figure', figsize=(7, 2), facecolor='b')
+	matplotlib.rc('figure', figsize=(7, 2.1), facecolor='b')
+	matplotlib.rcParams.update({'font.size': 6})
 	fig, ax = plt.subplots()
 
 	x_axis_time, y_axis_moolah = get_moolah_history(user_id, guild_id)
 	ax.fill_between(x_axis_time, y_axis_moolah, color="skyblue", alpha=0.3)
-	ax.set_yticklabels([clean_money(y) for y in y_axis_moolah])
+	ax.set_xticklabels([])
+	ax.yaxis.set_major_formatter(clean_formatter)
+	ax.tick_params(
+		axis='x',  # changes apply to the x-axis
+		which='both',  # both major and minor ticks are affected
+		bottom=False,  # ticks along the bottom edge are off
+		top=False,  # ticks along the top edge are off
+		labelbottom=False)
+	ax.set_xlabel('Moolah vs Time              ', fontsize='medium')
 	return plt
 
 
