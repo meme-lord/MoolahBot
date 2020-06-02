@@ -1,5 +1,6 @@
 import logging
 import threading
+from datetime import datetime
 from typing import List, Set, Tuple
 
 import config
@@ -178,14 +179,15 @@ def get_leaderboard_position(user_id, guild_id):
 	:return int:
 	"""
 	c = db.cursor()
-	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC", (guild_id,))
+	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC",
+			  (guild_id,))
 	pos = 1
 	user_id = int(user_id)
 	result = (0, 0)
 	people = c.fetchall()
 	pos = [x[0] for x in people].index(user_id)
 	balance = people[pos][1]
-	return pos+1, balance
+	return pos + 1, balance
 
 
 def get_achievements(user_id: int, guild_id: int):
@@ -223,8 +225,47 @@ def has_achievement(user_id: int, guild_id: int, achievement_type: int):
 	return x
 
 
+def get_cointoss_count(userid: int, guildid: int):
+	"""
+	Counts the number of coin transactions
+	"""
+	c = db.cursor()
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=3 and recipient=%s and discord_id=%s and guild_id=%s",
+			  (userid, userid, guildid))
+	res = c.fetchone()
+	if res is None:
+		return 0
+	return res[0]
+
+
+def get_moolah_history(userid: int, guildid: int):
+	c = db.cursor()
+	c.execute("SELECT * FROM transactions WHERE recipient=%s or sender=%s and guild_id=%s", (userid, userid, guildid))
+	result = c.fetchall()
+	if result is None:
+		return [], []
+	x_time_axis = []
+	y_moolah_axis = []
+	start = 0
+	for entry in result:
+		if userid == entry[3]:
+			# gain money
+			start += entry[2]
+			x_time_axis.append(datetime.fromtimestamp(entry[6]))
+			y_moolah_axis.append(start)
+		elif userid == entry[4]:
+			# lose money
+			start -= entry[2]
+			x_time_axis.append(datetime.fromtimestamp(entry[6]))
+			y_moolah_axis.append(start)
+	return x_time_axis, y_moolah_axis
+
+
 db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
 # db = MySQLdb.connect()
 db.autocommit(True)
 member_dict = None
 get_member_id_dict()
+
+if __name__ == '__main__':
+	pass

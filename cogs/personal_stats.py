@@ -1,16 +1,14 @@
 import logging
-import random
-from datetime import timedelta, datetime
+from datetime import timedelta
 from io import BytesIO
 
 import matplotlib
 from PIL import Image, ImageDraw, ImageFont
-import discord
-from discord import File
+from discord import File, Member
 from discord.ext import commands
 from matplotlib import pyplot as plt
 
-from database import get_user_balance, get_property, get_vctime, get_leaderboard_position
+from database import get_user_balance, get_property, get_vctime, get_leaderboard_position, get_moolah_history
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ class PersonalStats(commands.Cog):
 		self.fnt2 = ImageFont.truetype('data//fonts//Cuadra-Bold.otf', 20)
 
 	@commands.command()
-	async def profile(self, ctx, person: discord.Member = None):
+	async def profile(self, ctx, person: Member = None):
 		if person is None:
 			person = ctx.author
 		# Img dimensions
@@ -55,7 +53,7 @@ class PersonalStats(commands.Cog):
 			draw.text(((W - w) / 2, (H - h) / 2.6), usrtxt, font=self.fnt2, fill=(255, 255, 0))
 
 			# LeaderBoard Position
-			pos,_ = get_leaderboard_position(person.id, ctx.guild.id)
+			pos, _ = get_leaderboard_position(person.id, ctx.guild.id)
 			msg_sent = str(pos)
 			w1, h1 = draw.textsize(msg_sent, font=self.fnt2)
 			draw.text((int((W - w1) / 1.1), (H - h1) / 7.5), msg_sent, font=self.fnt2, fill=(255, 255, 0))
@@ -71,7 +69,7 @@ class PersonalStats(commands.Cog):
 			draw.text(((W - w1) / 1.06, (H - h1) / 2.9), jtime, font=self.fnt2, fill=(255, 255, 0))
 
 			# Create Moolah Graph
-			graph = m_balance_graph()
+			graph = m_balance_graph(person.id, ctx.guild.id)
 			graph.savefig(bytIO2)
 			bytIO2.seek(0)
 			graph = Image.open(bytIO2)
@@ -120,7 +118,7 @@ def clean_money(amount):
 			return str(amount)
 
 
-def m_balance_graph():
+def m_balance_graph(user_id: int, guild_id: int):
 	"""
 	Creates a linegraph for moolah balance over a time period.
 	"""
@@ -128,7 +126,10 @@ def m_balance_graph():
 	matplotlib.rcParams['axes.facecolor'] = 'black'
 	matplotlib.rc('figure', figsize=(7, 2), facecolor='b')
 	fig, ax = plt.subplots()
-	ax.fill_between(range(10), [random.randint(1, 100) for x in range(10)], color="skyblue", alpha=0.3)
+
+	x_axis_time, y_axis_moolah = get_moolah_history(user_id, guild_id)
+	ax.fill_between(x_axis_time, y_axis_moolah, color="skyblue", alpha=0.3)
+	ax.set_yticklabels([clean_money(y) for y in y_axis_moolah])
 	return plt
 
 
