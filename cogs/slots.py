@@ -47,31 +47,32 @@ class Slots(commands.Cog):
 		await asyncio.sleep(0.6)
 		await sent_msg.edit(content=slot_machine.format(first=items[result[0]][2], second=items[result[1]][2],
 														third=items[result[2]][2]))
-
 		won_something = False
-		log.info(f"Result: {result}")
-		for item in set(result):
-			count = result.count(item)
-			if count == 2:
-				pool = amount * items[item][0]
-				await ctx.send(f"You won {pool} moolah!")
-				success, err_msg = database.execute_transaction(6, 0, ctx.author.id, ctx.guild.id, pool)
-				if not success:
-					await ctx.send(err_msg.format(sender={ctx.author.mention}))
-					return
-				won_something = True
-			elif count == 3:
-				pool = amount * items[item][1]
-				await ctx.send(f"You won {pool} moolah!")
-				success, err_msg = database.execute_transaction(6, 0, ctx.author.id, ctx.guild.id, pool)
-				if not success:
-					await ctx.send(err_msg.format(sender={ctx.author.mention}))
-					return
-				won_something = True
-		if not won_something:
-			await ctx.send("Alas luck wasn't on your side")
-		on_slot_end = self.bot.events[__name__]['slots']
-		await on_slot_end.set((ctx.author.id, ctx.guild.id))
+		try:
+			log.info(f"Result: {result}")
+			for item in set(result):
+				count = result.count(item)
+				if count == 2:
+					pool = amount * items[item][0]
+					await ctx.send(f"You won {pool} moolah!")
+					success, err_msg = database.execute_transaction(6, ctx.author.id, 0, ctx.guild.id, pool)
+					if not success:
+						await ctx.send(err_msg.format(sender={ctx.author.mention}))
+						return
+					won_something = True
+				elif count == 3:
+					pool = amount * items[item][1]
+					await ctx.send(f"You won {pool} moolah!")
+					success, err_msg = database.execute_transaction(6, ctx.author.id, 0, ctx.guild.id, pool)
+					if not success:
+						await ctx.send(err_msg.format(sender={ctx.author.mention}))
+						return
+					won_something = True
+			if not won_something:
+				await ctx.send("Alas luck wasn't on your side")
+		finally:
+			on_slot_end = self.bot.events[__name__]['slots']
+			await on_slot_end.set((ctx.author.id, ctx.guild.id, won_something))
 
 
 def setup(bot):

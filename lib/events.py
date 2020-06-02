@@ -71,10 +71,10 @@ def on_slots_end(f):
 
 	@functools.wraps(f)
 	async def wrapper(self, *args, **kwargs):
-		onvc = self.bot.events['cogs.slots']['slots']
-		await onvc.wait()
-		onvc.clear()
-		ret = f(self, *args, **kwargs, var=onvc.arg)
+		onse = self.bot.events['cogs.slots']['slots']
+		await onse.wait()
+		onse.clear()
+		ret = f(self, *args, **kwargs, var=onse.arg)
 		x = await ret
 		asyncio.create_task(wrapper(self, *args, **kwargs))
 		return x

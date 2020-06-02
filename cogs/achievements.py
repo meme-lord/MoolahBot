@@ -3,7 +3,8 @@ import logging
 
 from discord.ext import commands
 
-from database import get_achievements_types, has_achievement, get_vctime, set_achievement, get_slot_count
+from database import get_achievements_types, has_achievement, get_vctime, set_achievement, get_slot_count, \
+	get_leaderboard_position
 from lib.events import on_vc_moolah_update, on_cointoss_end, on_slots_end
 from lib.utils import send_dm
 
@@ -18,19 +19,15 @@ class Achievements(commands.Cog):
 		asyncio.create_task(self.check_pos_leaderboard())
 		asyncio.create_task(self.hr_vc())
 		asyncio.create_task(self.on_cointoss())
+		asyncio.create_task(self.on_slots())
 
 	@on_vc_moolah_update
 	async def check_pos_leaderboard(self, var):
-		# TODO finish this after get_leaderboard is fixed.
-		'''
 		if var is None:
-			log.error(f"check_pos_leaderboard was called with None var")
 			return
-		log.debug(var)
 		for user in var:
 			position, _ = get_leaderboard_position(user[0], user[1])
-			await self.send_tg_achievement_msg(position, user[0], user[1])'''
-		pass
+			await self.send_tg_achievement_msg(position, user[0], user[1])
 
 	@on_vc_moolah_update
 	async def hr_vc(self, var):
@@ -62,9 +59,9 @@ class Achievements(commands.Cog):
 	async def on_cointoss(self, var):
 		if var is None:
 			return
-		# TODO win 100 cointosses
-		# TODO Unlucky - lose cointoss 10 times in a row
-		pass
+
+	# TODO win 100 cointosses
+	# TODO Unlucky - lose cointoss 10 times in a row
 
 	@commands.Cog.listener(name='on_member_update')
 	async def on_member_update(self, before, after):
@@ -79,7 +76,7 @@ class Achievements(commands.Cog):
 		if var is None:
 			return
 		amount = get_slot_count(var[0], var[1])
-		if len(amount) >= 100 and not has_achievement(var[0], var[1], 10):
+		if amount >= 100 and not has_achievement(var[0], var[1], 10):
 			await set_achievement(var[0], var[1], 10)
 			message = "Achievement Unlocked: Gambling Addict!, Play slots more than 100 times."
 			await send_dm(self.bot, var[0], message)
@@ -90,14 +87,17 @@ class Achievements(commands.Cog):
 
 	async def send_tg_achievement_msg(self, pos, user_id, guild_id):
 		if pos == 1 and not has_achievement(user_id, guild_id, 1):  # topdog 1
+			await set_achievement(user_id, guild_id, 1)
 			user = self.bot.get_user(user_id)
 			channel = await user.create_dm()
 			await channel.send('Congrats!, you are No.1 in Topdog!')
 		elif pos <= 10 and not has_achievement(user_id, guild_id, 2):  # topdog 10
+			await set_achievement(user_id, guild_id, 2)
 			user = self.bot.get_user(user_id)
 			channel = await user.create_dm()
 			await channel.send('Congrats!, you are No.10 in Topdog!')
 		elif pos <= 100 and not has_achievement(user_id, guild_id, 3):  # topdog 100
+			await set_achievement(user_id, guild_id, 3)
 			user = self.bot.get_user(user_id)
 			channel = await user.create_dm()
 			await channel.send('Congrats!, you are No.100 in Topdog!')

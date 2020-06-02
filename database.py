@@ -153,7 +153,8 @@ def get_vctime(userid: int, guildid: int):
 	Counts the number of voice chat awarded transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(id) FROM transactions WHERE type=5 and recipient=%s and guild_id=%s", (userid, guildid))
+	c.execute("SELECT COUNT(id) FROM moolah.transactions WHERE type=5 and recipient=%s and guild_id=%s",
+			  (userid, guildid))
 	res = c.fetchone()
 	if res is None:
 		return 0
@@ -165,7 +166,7 @@ def get_slot_count(userid: int, guildid: int):
 	Counts the number of slot transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(id) FROM transactions WHERE type=6 and recipient=%s and guild_id=%s", (userid, guildid))
+	c.execute("SELECT COUNT(id) FROM moolah.transactions WHERE type=6 and sender=%s and guild_id=%s", (userid, guildid))
 	res = c.fetchone()
 	if res is None:
 		return 0
@@ -210,7 +211,7 @@ def get_achievements_types():
 async def set_achievement(user_id: int, guild_id: int, achievement_type: int):
 	c = db.cursor()
 	c.execute(
-		"INSERT INTO user_achievements (discord_id,guild_id, achievement) VALUES (%s, %s, %s)",
+		"INSERT INTO achievements.user_achievements (discord_id,guild_id, achievement) VALUES (%s, %s, %s)",
 		(user_id, guild_id, achievement_type))
 	c.close()
 
@@ -266,6 +267,3 @@ db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB
 db.autocommit(True)
 member_dict = None
 get_member_id_dict()
-
-if __name__ == '__main__':
-	pass

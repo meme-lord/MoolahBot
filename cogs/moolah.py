@@ -51,8 +51,6 @@ class Moolah(commands.Cog):
 			self.recent_msg_tracking[(message.author.id, message.guild.id)] = message.created_at
 			database.moolah_earned(message.author.id, message.guild.id, config.msg_moolah)
 
-
-
 	async def moolah_loop(self):
 		onup = self.bot.events[__name__]['moolahVoice']
 		await self.bot.wait_until_ready()
@@ -68,7 +66,7 @@ class Moolah(commands.Cog):
 							ids.add((member.id, guild.id))
 			if ids:
 				database.vc_moolah_earned(ids, config.vc_moolah)
-				await onup.set(list(map(lambda x: x[0], ids)))
+				await onup.set(list(map(lambda x: x, ids)))
 			# clean up message dict
 			five_mins_ago = datetime.datetime.now() - self.time_between_moolah_msgs
 			# this dict loop runs every minute maybe impact can be reduced?
