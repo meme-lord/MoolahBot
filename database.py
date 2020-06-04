@@ -224,13 +224,13 @@ def has_achievement(user_id: int, guild_id: int, achievement_type: int):
 	return x
 
 
-def get_cointoss_count(userid: int, guildid: int):
+def get_cointoss_count(userid: int, guildid: int, type: int):
 	"""
-	Counts the number of coin transactions
+	Counts the number of cointoss transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(id) FROM transactions WHERE type=3 and recipient=%s and discord_id=%s and guild_id=%s",
-			  (userid, userid, guildid))
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=%s and recipient=%s and discord_id=%s and guild_id=%s",
+			  (type, userid, userid, guildid))
 	res = c.fetchone()
 	if res is None:
 		return 0

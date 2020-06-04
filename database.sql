@@ -60,9 +60,11 @@ VALUES (1, 'TopDog', 'You stand upon mountains of moolah and declare yourself a 
        (4, 'Bubbly', 'Reach 100hrs in Voice Chat'),
        (5, 'Is it just me or is it hot in here ?', 'Be in voice chat with 10 people'),
        (6, 'Riot!', 'Be in voice chat with 20 people'),
-       (7, 'I Owe You An Apology', 'lose Cointoss 5 times in a row'),
-       (8, 'The Bookies want your location!', 'win Cointoss 5 times in a row'),
-       (9, 'Cursed', 'lose Cointoss 10 times in a row'),
+       (7, 'I Owe You An Apology', 'lose Cointoss 5 times in a row'),           # TODO
+       (8, 'The Bookies want your location!', 'win Cointoss 5 times in a row'), # TODO
+       (9, 'Cursed', 'lose Cointoss 10 times in a row'),                        # TODO
        (10, 'Gambling Addict', 'Play slots more than 100 times'),
-       (11, 'Gum On My Shoe', 'Lose 100k moolah on gambling'),
-       (12, 'Promoted', 'Get a different discord role')
+       (11, 'Gum On My Shoe', 'Lose 100k moolah on gambling'),                  # TODO
+       (12, 'Promoted', 'Get a different discord role'),
+       (13, 'Feels bad man', 'Lose 100 cointosses'),
+       (14, 'On a Roll!', 'Win 100 cointosses')
