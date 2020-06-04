@@ -56,7 +56,7 @@ class CoinToss(commands.Cog):
 		if msg.content.lower() in self.outcomes:
 			winner = ctx.author
 			loser = opponent
-			if msg.content.lower() is outcome:
+			if msg.content.lower() == outcome:
 				winner = opponent
 				loser = ctx.author
 			await ctx.send(f"The coin landed on {outcome}. {winner.mention} won {amount} Moolah!")

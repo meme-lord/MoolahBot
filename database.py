@@ -153,7 +153,7 @@ def get_vctime(userid: int, guildid: int):
 	Counts the number of voice chat awarded transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(id) FROM moolah.transactions WHERE type=5 and recipient=%s and guild_id=%s",
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=5 and recipient=%s and guild_id=%s",
 			  (userid, guildid))
 	res = c.fetchone()
 	if res is None:
@@ -166,7 +166,7 @@ def get_slot_count(userid: int, guildid: int):
 	Counts the number of slot transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(id) FROM moolah.transactions WHERE type=6 and sender=%s and guild_id=%s", (userid, guildid))
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=6 and sender=%s and guild_id=%s", (userid, guildid))
 	res = c.fetchone()
 	if res is None:
 		return 0
@@ -182,9 +182,7 @@ def get_leaderboard_position(user_id, guild_id):
 	c = db.cursor()
 	c.execute("SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC",
 			  (guild_id,))
-	pos = 1
 	user_id = int(user_id)
-	result = (0, 0)
 	people = c.fetchall()
 	pos = [x[0] for x in people].index(user_id)
 	balance = people[pos][1]
@@ -193,7 +191,7 @@ def get_leaderboard_position(user_id, guild_id):
 
 def get_achievements(user_id: int, guild_id: int):
 	c = db.cursor()
-	c.execute("SELECT * FROM achievements.user_achievements WHERE discord_id=%s and guild_id=%s", (user_id, guild_id))
+	c.execute("SELECT * FROM user_achievements WHERE discord_id=%s and guild_id=%s", (user_id, guild_id))
 	c.close()
 	return c.fetchall()
 
@@ -201,7 +199,7 @@ def get_achievements(user_id: int, guild_id: int):
 def get_achievements_types():
 	data = {}
 	c = db.cursor()
-	c.execute("SELECT * FROM achievements.achievements_types")
+	c.execute("SELECT * FROM achievements_types")
 	result = c.fetchall()
 	for item in result:
 		data[item[0]] = {'name': item[1], 'description': item[2]}
@@ -211,7 +209,7 @@ def get_achievements_types():
 async def set_achievement(user_id: int, guild_id: int, achievement_type: int):
 	c = db.cursor()
 	c.execute(
-		"INSERT INTO achievements.user_achievements (discord_id,guild_id, achievement) VALUES (%s, %s, %s)",
+		"INSERT INTO user_achievements (discord_id,guild_id, achievement) VALUES (%s, %s, %s)",
 		(user_id, guild_id, achievement_type))
 	c.close()
 
@@ -219,7 +217,7 @@ async def set_achievement(user_id: int, guild_id: int, achievement_type: int):
 def has_achievement(user_id: int, guild_id: int, achievement_type: int):
 	c = db.cursor()
 	c.execute(
-		"SELECT EXISTS(SELECT * FROM achievements.user_achievements WHERE discord_id=%s and guild_id=%s and achievement=%s)",
+		"SELECT EXISTS(SELECT * FROM user_achievements WHERE discord_id=%s and guild_id=%s and achievement=%s)",
 		(user_id, guild_id, achievement_type))
 	result = c.fetchone()
 	x = False if int(result[0]) == 0 else True
@@ -263,7 +261,6 @@ def get_moolah_history(userid: int, guildid: int):
 
 
 db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
-# db = MySQLdb.connect()
 db.autocommit(True)
 member_dict = None
 get_member_id_dict()

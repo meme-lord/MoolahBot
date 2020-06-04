@@ -57,23 +57,30 @@ class Moolah(commands.Cog):
 		while not self.bot.is_closed():
 			log.debug("Start of moolah loop")
 			# award the vc moolah
-			ids = set()
-			for guild in self.bot.guilds:
-				for channel in guild.voice_channels:
-					real_p = list(filter(eligible_for_moolah, channel.members))
-					if len(real_p) > 1:
-						for member in real_p:
-							ids.add((member.id, guild.id))
+			ids = self.get_users_in_vc()
 			if ids:
 				database.vc_moolah_earned(ids, config.vc_moolah)
 				await onup.set(list(map(lambda x: x, ids)))
 			# clean up message dict
-			five_mins_ago = datetime.datetime.utcnow() - self.time_between_moolah_msgs
-			# this dict loop runs every minute maybe impact can be reduced?
-			for key, value in self.recent_msg_tracking.copy().items():
-				if value < five_mins_ago:
-					self.recent_msg_tracking.pop(key, None)
+			self.clean_recent_message_dict()
 			await asyncio.sleep(config.vc_time)
+
+	def get_users_in_vc(self):
+		ids = set()
+		for guild in self.bot.guilds:
+			for channel in guild.voice_channels:
+				real_p = list(filter(eligible_for_moolah, channel.members))
+				if len(real_p) > 1:
+					for member in real_p:
+						ids.add((member.id, guild.id))
+		return ids
+
+	def clean_recent_message_dict(self):
+		five_mins_ago = datetime.datetime.utcnow() - self.time_between_moolah_msgs
+		# this dict loop runs every minute maybe impact can be reduced?
+		for key, value in self.recent_msg_tracking.copy().items():
+			if value < five_mins_ago:
+				self.recent_msg_tracking.pop(key, None)
 
 
 def eligible_for_moolah(person):
