@@ -2,11 +2,12 @@ import asyncio
 import logging
 
 from discord.ext import commands
+from prettytable import PrettyTable
 
 from database import get_achievements_types, has_achievement, get_vctime, set_achievement, get_slot_count, \
-	get_leaderboard_position, get_cointoss_count
+	get_leaderboard_position, get_cointoss_count, get_achievements
 from lib.events import on_vc_moolah_update, on_cointoss_end, on_slots_end
-from lib.utils import send_dm
+from lib.utils import send_dm, emb
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,22 @@ class Achievements(commands.Cog):
 		asyncio.create_task(self.hr_vc())
 		asyncio.create_task(self.on_cointoss())
 		asyncio.create_task(self.on_slots())
+
+	@commands.command()
+	async def achievements(self, ctx):
+		achievements = get_achievements(ctx.author.id, ctx.guild.id)
+		if len(achievements) == 0:
+			await ctx.send('You have not unlocked any achievements yet.')
+			return
+
+		x = PrettyTable()
+		x.field_names = ["Name", "Description"]
+		x.align["Name"] = "l"
+		x.align["Description"] = "l"
+		t_data = [self.achievement_types[x[2]] for x in achievements]
+		for item in t_data:
+			x.add_row([item['name'], item['description']])
+		await ctx.send(emb(x) + f'\n Progress: {len(achievements)}/{len(self.achievement_types)}')
 
 	@on_vc_moolah_update
 	async def check_pos_leaderboard(self, var):

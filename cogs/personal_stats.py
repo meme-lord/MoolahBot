@@ -8,8 +8,11 @@ from PIL import Image, ImageDraw, ImageFont
 from discord import File, Member
 from discord.ext import commands
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import text
+from numpy import radians
 
-from database import get_user_balance, get_property, get_vctime, get_leaderboard_position, get_moolah_history
+from database import get_user_balance, get_property, get_vctime, get_leaderboard_position, get_moolah_history, \
+	get_achievements
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +35,7 @@ class PersonalStats(commands.Cog):
 
 		# Buffers for storing images in memory
 		buffer_1 = BytesIO()
+		buffer_2 = BytesIO()
 		# Load Background Image and create draw object
 		try:
 			with open(self.black, 'rb') as f:
@@ -71,14 +75,27 @@ class PersonalStats(commands.Cog):
 
 			# Create Moolah Graph
 			graph = m_balance_graph(person.id, ctx.guild.id)
-			graph.savefig(buffer_1)
+			graph.savefig(buffer_1)  # , transparent=True)
+			graph.close()
+
+			# Create Achievement progress bar
+			if 'Achievements' in self.bot.cogs:
+				total_ach = len(self.bot.cogs['Achievements'].achievement_types)
+				achievements = len(get_achievements(person.id, ctx.guild.id))
+				graph2 = circle_progress(achievements, total_ach)
+				graph2.savefig(buffer_2)  # , transparent=True)
+				graph2.close()
+
+				buffer_2.seek(0)
+				graph2 = Image.open(buffer_2)
+				img.paste(graph2, (0, 258))
+
 			buffer_1.seek(0)
 			graph = Image.open(buffer_1)
-
 			img.paste(graph, (-45, 390))
 
 			# Paste Profile Pic
-			profpic = await self.get_profile_pic(person)
+			profpic = await get_profile_pic(person)
 			img.paste(profpic, (240, 50))
 			buffer_1.seek(0)
 			img.save(buffer_1, format='png')
@@ -86,19 +103,18 @@ class PersonalStats(commands.Cog):
 			# Send and Close Buffers
 			buffer_1.seek(0)
 			await ctx.send(file=File(buffer_1, filename=f"{person.id}.png"))
-		except Exception as e:
-			log.error(e)
 		finally:
 			buffer_1.close()
 
-	async def get_profile_pic(self, person):
-		"""
-		Downloads Discord profile pic and loads it
-		:returns ImageObj , buffer:
-		"""
-		f = BytesIO(await person.avatar_url_as(size=128, format='png').read())
-		profpic = Image.open(f)
-		return profpic
+
+async def get_profile_pic(person):
+	"""
+	Downloads Discord profile pic and loads it
+	:returns ImageObj , buffer:
+	"""
+	f = BytesIO(await person.avatar_url_as(size=128, format='png').read())
+	profpic = Image.open(f)
+	return profpic
 
 
 def clean_money(amount):
@@ -145,6 +161,24 @@ def m_balance_graph(user_id: int, guild_id: int):
 		top=False,  # ticks along the top edge are off
 		labelbottom=False)
 	ax.set_xlabel('Moolah vs Time              ', fontsize='medium')
+	return plt
+
+
+def circle_progress(no: int, max):
+	# plt.style.use(['dark_background'])
+	matplotlib.rc('figure', figsize=(1.5, 1.5), facecolor='b')
+	fig, _ = plt.subplots()
+	ax = plt.subplot(projection='polar')
+	r_v = radians([no / max * 360, 0])
+	ax.barh([1, 0], r_v, color='#FFFF00')
+	# Turn off tick labels
+	ax.set_yticklabels([])
+	ax.set_xticklabels([])
+	# Hide grid lines
+	ax.grid(False)
+	ax.axis('off')
+	test = text(0.5, 0.5, f'Achievements\n{no}/{max}', horizontalalignment='center', verticalalignment='center',
+				transform=ax.transAxes)
 	return plt
 
 

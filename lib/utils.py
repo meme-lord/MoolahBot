@@ -1,9 +1,13 @@
-import asyncio
+import functools
+import logging
 from difflib import get_close_matches
+from timeit import default_timer as timer
 
 import discord
 from discord.ext import commands
 from emoji import UNICODE_EMOJI
+
+log = logging.getLogger(__name__)
 
 
 class usernotFound(Exception):
@@ -53,8 +57,7 @@ def is_admin():
 	:return:
 	"""
 
-	@asyncio.coroutine
-	def predicate(ctx):
+	async def predicate(ctx):
 		if ctx.author.guild_permissions.administrator:
 			return True
 		else:
@@ -105,3 +108,20 @@ async def send_dm(bot, userid, message):
 	user = bot.get_user(userid)
 	channel = await user.create_dm()
 	await channel.send(message)
+
+
+def measure(f):
+	"""
+	Easy way to measure function execution time.
+	"""
+
+	@functools.wraps(f)
+	async def wrapper(*args, **kwargs):
+		start = timer()
+		ret = f(*args, **kwargs)
+		x = await ret
+		end = timer()
+		log.info(f'Function {f.__name__} has taken {end - start}')
+		return x
+
+	return wrapper

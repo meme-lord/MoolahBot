@@ -191,9 +191,11 @@ def get_leaderboard_position(user_id, guild_id):
 
 def get_achievements(user_id: int, guild_id: int):
 	c = db.cursor()
-	c.execute("SELECT * FROM user_achievements WHERE discord_id=%s and guild_id=%s", (user_id, guild_id))
-	c.close()
-	return c.fetchall()
+	try:
+		c.execute("SELECT * FROM user_achievements WHERE discord_id=%s and guild_id=%s", (user_id, guild_id))
+		return c.fetchall()
+	finally:
+		c.close()
 
 
 def get_achievements_types():
