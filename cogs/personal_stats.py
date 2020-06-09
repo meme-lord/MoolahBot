@@ -28,6 +28,9 @@ class PersonalStats(commands.Cog):
 
 	@commands.command()
 	async def profile(self, ctx, person: Member = None):
+		"""
+		Shows you all your stats
+		"""
 		if person is None:
 			person = ctx.author
 		# Img dimensions

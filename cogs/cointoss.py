@@ -13,8 +13,11 @@ log = logging.getLogger(__name__)
 
 
 class CoinToss(commands.Cog):
+	"""
+	Letting you lose all your Moolah since 2017!
+	"""
+
 	cointoss_lock = threading.Lock()
-	"""Letting you lose all your Moolah since 2017!"""
 
 	def __init__(self, bot):
 		self.bot = bot
@@ -22,7 +25,7 @@ class CoinToss(commands.Cog):
 		self.bot.events[__name__]['cointoss'] = EventV2()
 		self.outcomes = ['heads', 'tails']  # could have other sets of outcomes? roulette anyone?
 
-	@commands.command()
+	@commands.command(aliases=['coinflip'])
 	async def cointoss(self, ctx, amount: int, opponent: discord.Member):
 		log.debug(f"cointoss({amount}, {opponent})")
 		amount = abs(int(amount))
@@ -32,11 +35,11 @@ class CoinToss(commands.Cog):
 			# the transaction function already checks if they have sufficient balance
 			success, err_msg = database.execute_transaction(2, 0, ctx.author.id, ctx.guild.id, amount)
 			if not success:
-				await ctx.send(err_msg.format(sender={ctx.author.mention}))
+				await ctx.send(err_msg.format(sender=ctx.author.mention))
 				return
 			success, err_msg = database.execute_transaction(2, 0, opponent.id, ctx.guild.id, amount)
 			if not success:
-				await ctx.send(err_msg.format(sender={opponent.mention}))
+				await ctx.send(err_msg.format(sender=opponent.mention))
 				# roll back the other transaction
 				database.execute_transaction(7, ctx.author.id, 0, ctx.guild.id, amount)
 				return

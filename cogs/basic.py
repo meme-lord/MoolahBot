@@ -12,9 +12,12 @@ class Basic(commands.Cog):
 
 	@commands.command()
 	async def ping(self, ctx):
+		"""
+		What do you think?
+		"""
 		await ctx.send('pong')
 
-	@commands.command()
+	@commands.command(hidden=True)
 	async def pong(self, ctx):
 		await ctx.send("Don't get smart with me kiddo")
 

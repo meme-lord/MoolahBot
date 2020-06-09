@@ -23,24 +23,35 @@ class Moolah(commands.Cog):
 		self.provision = self.bot.loop.create_task(self.moolah_loop())
 		self.time_between_moolah_msgs = datetime.timedelta(seconds=config.time_between_msg_moolah)
 
-	@commands.command()
+	@commands.command(aliases=['leaderboard'])
 	async def topdog(self, ctx):
+		"""
+		Shows to top 10 leaderboard
+		"""
 		entries = database.topdog(ctx.guild.id)
-		x = PrettyTable(["Position", "Name", "Moolah"])
-		x.align["Name"] = 'l'
-		x.align["Moolah"] = 'l'
+
 		position = 1
 		author_in_top10 = False
+		entry_list = []
 		for discord_id, balance in entries:
 			if discord_id == ctx.author.id:
 				author_in_top10 = True
 			member = await ctx.guild.fetch_member(discord_id)
-			x.add_row([position, member.display_name, balance])
+			if entry_list and entry_list[-1][2] == balance:
+				entry_list.append([entry_list[-1][0], member.display_name, balance])
+			else:
+				entry_list.append([position, member.display_name, balance])
 			position += 1
 		if not author_in_top10:
-			x.add_row(['...', '...', '...'])
+			entry_list.append(['...', '...', '...'])
 			position, balance = database.get_leaderboard_position(ctx.author.id, ctx.guild.id)
-			x.add_row([position, ctx.author.display_name, balance])
+			entry_list.append([position, ctx.author.display_name, balance])
+
+		x = PrettyTable(["Position", "Name", "Moolah"])
+		x.align["Name"] = 'l'
+		x.align["Moolah"] = 'l'
+		for entry in entry_list:
+			x.add_row(entry)
 		await ctx.send(f"```{x}```")
 
 	@commands.Cog.listener(name='on_message')
