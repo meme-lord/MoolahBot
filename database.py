@@ -93,15 +93,16 @@ def add_users(discord_ids: List[int], guild_id: int):
 	global member_dict
 	log.debug(f"add_users({discord_ids}, {guild_id})")
 	new_users = list()
-	if guild_id not in member_dict:
-		member_dict[guild_id] = set()
+	mem_dict = get_member_id_dict()
+	if guild_id not in mem_dict:
+		mem_dict[guild_id] = set()
 	for discord_id in discord_ids:
-		if discord_id not in member_dict[guild_id]:
+		if discord_id not in mem_dict[guild_id]:
 			new_users.append((discord_id, guild_id))
 
 	c = db.cursor()
 	c.executemany(
-		"INSERT INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0)",
+		"INSERT IGNORE INTO users (discord_id, guild_id, balance, lifetime_moolah) VALUES (%s, %s, 0, 0)",
 		new_users)
 	member_dict[guild_id].update(new_users)
 
@@ -231,8 +232,8 @@ def get_cointoss_count(userid: int, guildid: int, type: int):
 	Counts the number of cointoss transactions
 	"""
 	c = db.cursor()
-	c.execute("SELECT COUNT(id) FROM transactions WHERE type=%s and recipient=%s and discord_id=%s and guild_id=%s",
-			  (type, userid, userid, guildid))
+	c.execute("SELECT COUNT(id) FROM transactions WHERE type=%s and recipient=%s and guild_id=%s",
+			  (type, userid, guildid))
 	res = c.fetchone()
 	if res is None:
 		return 0

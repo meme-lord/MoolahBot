@@ -2,7 +2,11 @@
 # Stolen from https://stackoverflow.com/questions/207981/how-to-enable-mysql-client-auto-re-connect-with-mysqldb/982873#982873
 
 import MySQLdb
+import threading
+import logging
 
+reconnect_lock = threading.Lock()
+log = logging.getLogger(__name__)
 
 class DisconnectSafeCursor(object):
 	db = None
@@ -18,18 +22,28 @@ class DisconnectSafeCursor(object):
 	def execute(self, *args, **kwargs):
 		try:
 			return self.cursor.execute(*args, **kwargs)
-		except MySQLdb.OperationalError:
-			self.db.reconnect()
-			self.cursor = self.db.cursor()
+		except MySQLdb.OperationalError as e:
+			self.handle_error(e)
 			return self.cursor.execute(*args, **kwargs)
 
 	def executemany(self, *args, **kwargs):
 		try:
 			return self.cursor.executemany(*args, **kwargs)
-		except MySQLdb.OperationalError:
-			self.db.reconnect()
-			self.cursor = self.db.cursor()
+		except MySQLdb.OperationalError as e:
+			self.handle_error(e)
 			return self.cursor.executemany(*args, **kwargs)
+
+	def handle_error(self, error):
+		log.info(f"SQL Error: {error}")
+		if error[0] in [2006, 2002]:
+			if reconnect_lock.locked():
+				with reconnect_lock:
+					log.info("Not reconnecting as another thread should have done it")
+					return
+			with reconnect_lock:
+				log.info("Reconnecting to SQL server")
+				self.db.reconnect()
+				self.cursor = self.db.cursor()
 
 	def fetchone(self):
 		return self.cursor.fetchone()
