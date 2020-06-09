@@ -45,7 +45,7 @@ class CoinToss(commands.Cog):
 		try:
 			msg = await self.bot.wait_for('message',
 										  check=(lambda x: x.author.id is opponent.id and x.channel is ctx.channel),
-										  timeout=10)
+										  timeout=20)
 		except asyncio.TimeoutError:
 			await ctx.send("Cointoss timed out.")
 			# roll back the other transactions

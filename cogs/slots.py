@@ -22,7 +22,11 @@ class Slots(commands.Cog):
 		The Slot machine, a sure way of getting nothing from something.
 		Command: !slots <moolah_amount>
 		"""
-		amount = abs(int(amount))
+		try:
+			amount = abs(int(amount))
+		except ValueError as e:
+			log.info(e)
+			await ctx.send(f"{amount} is not a valid amount to bet. Must be an integer")
 
 		success, err_msg = database.execute_transaction(6, 0, ctx.author.id, ctx.guild.id, amount)
 		if not success:

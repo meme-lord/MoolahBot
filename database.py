@@ -91,7 +91,7 @@ def add_user(discord_id: int, guild_id: int):
 
 def add_users(discord_ids: List[int], guild_id: int):
 	global member_dict
-	log.info(f"add_users({discord_ids}, {guild_id})")
+	log.debug(f"add_users({discord_ids}, {guild_id})")
 	new_users = list()
 	if guild_id not in member_dict:
 		member_dict[guild_id] = set()
