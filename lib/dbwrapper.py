@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # Stolen from https://stackoverflow.com/questions/207981/how-to-enable-mysql-client-auto-re-connect-with-mysqldb/982873#982873
 
-import MySQLdb
-import threading
 import logging
+import threading
+
+import MySQLdb
 
 reconnect_lock = threading.Lock()
 log = logging.getLogger(__name__)
+
 
 class DisconnectSafeCursor(object):
 	db = None

@@ -6,7 +6,7 @@ from sys import stdout
 from discord.ext import commands
 
 import config
-import database
+from lib import database
 
 log = logging.getLogger(__name__)
 # noinspection PyArgumentList
@@ -28,7 +28,8 @@ class MyClient(commands.Bot):
 		log.info('Bot started\nLogged in as %s (%s)\n' % (self.user.name, self.user.id))
 
 		# Automated Cog Loader
-		[self.load_extension("cogs." + f.replace(".py", "")) for f in listdir('cogs') if isfile(join('cogs', f))]
+		[self.load_extension("cogs." + f.replace(".py", "")) for f in listdir('cogs') if
+		 isfile(join('cogs', f)) and f.replace(".py", "") not in [x.lower() for x in self.cogs]]
 
 		for server in self.guilds:
 			message = "%s : %s\n" % (server.name, server.id)

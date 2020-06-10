@@ -5,12 +5,15 @@ from timeit import default_timer as timer
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import check
 from emoji import UNICODE_EMOJI
+
+import config
 
 log = logging.getLogger(__name__)
 
 
-class usernotFound(Exception):
+class UserNotFound(Exception):
 	def __init__(self, user, match=None):
 		self.muser = user
 		self.match = match
@@ -48,7 +51,7 @@ async def search(ctx, member):
 				return user
 			else:
 
-				raise usernotFound(member)
+				raise UserNotFound(member)
 
 
 def is_admin():
@@ -125,3 +128,21 @@ def measure(f):
 		return x
 
 	return wrapper
+
+
+def is_bot_admin():
+	"""A :func:`.check` that checks if the person invoking this command has
+	 admin permissions
+	"""
+
+	async def predicate(ctx):
+		con = str(ctx.author.id) not in config.admin_usrs.split(',')
+		if con:
+			raise NoAdminPermissions('You do not have Bot admin previlages')
+		return True
+
+	return check(predicate)
+
+
+class NoAdminPermissions(Exception):
+	pass

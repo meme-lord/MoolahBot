@@ -40,5 +40,5 @@ def teardown(bot):
 	# Actions before unloading
 
 	# Remove Events
-	bot.event.pop(__name__, None)
+	bot.events.pop(__name__, None)
 	log.info(f"{__name__} unloaded!")

@@ -6,7 +6,7 @@ import threading
 import discord
 from discord.ext import commands
 
-import database
+from lib import database
 from lib.events import EventV2
 
 log = logging.getLogger(__name__)
@@ -83,5 +83,5 @@ def teardown(bot):
 	# Actions before unloading
 
 	# Remove Events
-	bot.event.pop(__name__, None)
+	bot.events.pop(__name__, None)
 	log.info(f"{__name__} unloaded!")

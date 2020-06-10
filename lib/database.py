@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Set, Tuple
 
 import config
-import mydbwrapper
+from lib import dbwrapper
 
 log = logging.getLogger(__name__)
 lock = threading.Lock()  # Lock is needed for transaction integrity don't forget to release!
@@ -263,7 +263,7 @@ def get_moolah_history(userid: int, guildid: int):
 	return x_time_axis, y_moolah_axis
 
 
-db = mydbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
+db = dbwrapper.disconnectSafeConnect(config.DB_HOST, config.DB_USER, config.DB_PASS, config.DB_DATABASE)
 db.autocommit(True)
 member_dict = None
 get_member_id_dict()

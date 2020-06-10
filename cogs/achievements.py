@@ -4,7 +4,7 @@ import logging
 from discord.ext import commands
 from prettytable import PrettyTable
 
-from database import get_achievements_types, has_achievement, get_vctime, set_achievement, get_slot_count, \
+from lib.database import get_achievements_types, has_achievement, get_vctime, set_achievement, get_slot_count, \
 	get_leaderboard_position, get_cointoss_count, get_achievements
 from lib.events import on_vc_moolah_update, on_cointoss_end, on_slots_end
 from lib.utils import send_dm, emb
@@ -24,6 +24,9 @@ class Achievements(commands.Cog):
 
 	@commands.command()
 	async def achievements(self, ctx):
+		"""
+		Displays users current achievements.
+		"""
 		achievements = get_achievements(ctx.author.id, ctx.guild.id)
 		if len(achievements) == 0:
 			await ctx.send('You have not unlocked any achievements yet.')
@@ -36,7 +39,8 @@ class Achievements(commands.Cog):
 		t_data = [self.achievement_types[x[2]] for x in achievements]
 		for item in t_data:
 			x.add_row([item['name'], item['description']])
-		await ctx.send(emb(x) + f'\n Progress: {len(achievements)}/{len(self.achievement_types)}')
+		message = emb(x) + f'\n Progress: {len(achievements)}/{len(self.achievement_types)}'
+		await send_dm(self.bot, ctx.author.id, message)
 
 	@on_vc_moolah_update
 	async def check_pos_leaderboard(self, var):
@@ -128,5 +132,5 @@ def teardown(bot):
 	# Actions before unloading
 
 	# Remove Events
-	bot.event.pop(__name__, None)
+	bot.events.pop(__name__, None)
 	log.info(f"{__name__} unloaded!")
