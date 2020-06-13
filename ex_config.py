@@ -7,4 +7,4 @@ vc_moolah = 10
 vc_time = 60
 msg_moolah = 5
 time_between_msg_moolah = 300  # seconds
-admin_usrs = '123,573'  # User IDs for bot admin commands
+admin_users = [123, 573]  # User IDs for bot admin commands

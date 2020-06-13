@@ -37,7 +37,8 @@ class DisconnectSafeCursor(object):
 
 	def handle_error(self, error):
 		log.info(f"SQL Error: {error}")
-		if error[0] in [2006, 2002]:
+		if isinstance(error,MySQLdb.OperationalError):
+		#if error[0] in [2006, 2002]:
 			if reconnect_lock.locked():
 				with reconnect_lock:
 					log.info("Not reconnecting as another thread should have done it")

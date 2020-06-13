@@ -28,8 +28,10 @@ class MyClient(commands.Bot):
 		log.info('Bot started\nLogged in as %s (%s)\n' % (self.user.name, self.user.id))
 
 		# Automated Cog Loader
-		[self.load_extension("cogs." + f.replace(".py", "")) for f in listdir('cogs') if
-		 isfile(join('cogs', f)) and f.replace(".py", "") not in [x.lower() for x in self.cogs]]
+		for f in listdir('cogs'):
+			cog_name = f.replace(".py", "")
+			if isfile(join('cogs', f)) and cog_name not in map(str.lower, self.cogs):
+				self.load_extension(f"cogs.{cog_name}")
 
 		for server in self.guilds:
 			message = "%s : %s\n" % (server.name, server.id)

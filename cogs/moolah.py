@@ -95,7 +95,7 @@ class Moolah(commands.Cog):
 
 
 def eligible_for_moolah(person):
-	return person.bot is False and not person.voice.self_deaf and not person.voice.deaf
+	return person.bot is False and not person.voice.self_deaf and not person.voice.deaf and not person.voice.self_mute and not person.voice.mute
 
 
 def setup(bot):

@@ -14,23 +14,31 @@ class Admin(commands.Cog):
 		self.bot = bot
 		self.bot.events[__name__] = {}
 
-	@commands.command(pass_context=True, hidden=True)
+	@commands.command(pass_context=True)
 	@is_bot_admin()
 	async def load(self, ctx, extension_name: str):
 		"""
 		Loads an extension.
 		"""
-		await load_c(self, ctx, extension_name)
+		try:
+			self.bot.load_extension(f'cogs.{extension_name}')
+			await ctx.message.channel.send(emb("Module [{}] Loaded".format(extension_name)))
+		except (AttributeError, ImportError) as e:
+			await ctx.message.channel.send("```py\n{}: {}\n```".format(type(e).__name__, str(e)))
 
-	@commands.command(pass_context=True, hidden=True)
+	@commands.command(pass_context=True)
 	@is_bot_admin()
 	async def unload(self, ctx, extension_name: str):
 		"""
 		Unloads an extension.
 		"""
-		await unload_c(self, ctx, extension_name)
+		try:
+			self.bot.unload_extension(f'cogs.{extension_name}')
+			await ctx.message.channel.send(emb("Module [{}] Unloaded!.".format(extension_name)))
+		except (AttributeError, ImportError) as e:
+			await ctx.message.channel.send("```py\n{}: {}\n```".format(type(e).__name__, str(e)))
 
-	@commands.command(pass_context=True, hidden=True)
+	@commands.command(pass_context=True)
 	@is_bot_admin()
 	async def reload(self, ctx, extension_name: str):
 		"""
@@ -39,7 +47,7 @@ class Admin(commands.Cog):
 		self.bot.reload_extension(f'cogs.{extension_name.lower()}')
 		await ctx.send(emb(f'{extension_name.lower()} reloaded!'))
 
-	@commands.command(pass_context=True, hidden=True)
+	@commands.command(pass_context=True)
 	@is_bot_admin()
 	async def update(self, ctx):
 		"""
@@ -56,7 +64,7 @@ class Admin(commands.Cog):
 		if error is not None:
 			log.error(error)
 
-	@commands.command(pass_context=True, hidden=True)
+	@commands.command(pass_context=True)
 	@is_bot_admin()
 	async def shutdown(self, ctx):
 		"""
@@ -65,7 +73,7 @@ class Admin(commands.Cog):
 		log.warning(f'[{ctx.author.id}][{ctx.author.name}] has initiated a shutdown!')
 		self.bot.loop.stop()
 
-	@commands.command(pass_context=True, hidden=True)
+	@commands.command(pass_context=True)
 	@is_bot_admin()
 	async def restart(self, ctx):
 		"""
@@ -73,24 +81,6 @@ class Admin(commands.Cog):
 		"""
 		log.warning(f'[{ctx.author.id}][{ctx.author.name}] has initiated a shutdown!')
 		sys.exit(42)
-
-
-async def load_c(self, ctx, extension_name):
-	try:
-		self.bot.load_extension(f'cogs.{extension_name}')
-		await ctx.message.channel.send(emb("Module [{}] Loaded".format(extension_name)))
-	except (AttributeError, ImportError) as e:
-		await ctx.message.channel.send("```py\n{}: {}\n```".format(type(e).__name__, str(e)))
-		return
-
-
-async def unload_c(self, ctx, extension_name):
-	try:
-		self.bot.unload_extension(f'cogs.{extension_name}')
-		await ctx.message.channel.send(emb("Module [{}] Unloaded!.".format(extension_name)))
-	except (AttributeError, ImportError) as e:
-		await ctx.message.channel.send("```py\n{}: {}\n```".format(type(e).__name__, str(e)))
-		return
 
 
 def setup(bot):

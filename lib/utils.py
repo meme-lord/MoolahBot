@@ -136,10 +136,7 @@ def is_bot_admin():
 	"""
 
 	async def predicate(ctx):
-		con = str(ctx.author.id) not in config.admin_usrs.split(',')
-		if con:
-			raise NoAdminPermissions('You do not have Bot admin previlages')
-		return True
+		return ctx.author.id in config.admin_users
 
 	return check(predicate)
 

@@ -30,7 +30,7 @@ class Slots(commands.Cog):
 
 		success, err_msg = database.execute_transaction(6, 0, ctx.author.id, ctx.guild.id, amount)
 		if not success:
-			await ctx.send(err_msg.format(sender={ctx.author.mention}))
+			await ctx.send(err_msg.format(sender=ctx.author.mention))
 			return
 
 		result = []
