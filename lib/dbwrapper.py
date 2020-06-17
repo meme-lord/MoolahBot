@@ -59,6 +59,7 @@ class DisconnectSafeConnection(object):
 	connect_args = None
 	connect_kwargs = None
 	conn = None
+	autocommit = True
 
 	def __init__(self, *args, **kwargs):
 		self.connect_args = args
@@ -67,6 +68,7 @@ class DisconnectSafeConnection(object):
 
 	def reconnect(self):
 		self.conn = MySQLdb.connect(*self.connect_args, **self.connect_kwargs)
+		self.conn.autocommit(self.autocommit)
 
 	def cursor(self, *args, **kwargs):
 		cur = self.conn.cursor(*args, **kwargs)
@@ -79,6 +81,7 @@ class DisconnectSafeConnection(object):
 		self.conn.rollback()
 
 	def autocommit(self, bool):
+		self.autocommit = bool
 		self.conn.autocommit(bool)
 
 

@@ -14,7 +14,9 @@ lock = threading.Lock()  # Lock is needed for transaction integrity don't forget
 
 
 def execute_transaction(type_id: int, recipient_id: int, sender_id: int, guild_id: int, amount: int):
-	log.debug(f"execute_transaction({type_id}, {recipient_id}, {sender_id}, {guild_id}, {amount})")
+	#log.debug(f"execute_transaction({type_id}, {recipient_id}, {sender_id}, {guild_id}, {amount})")
+	if type_id not in [4, 5]:
+		log.info(f"execute_transaction({type_id}, {recipient_id}, {sender_id}, {guild_id}, {amount})")
 	# Transactions don't affect lifetime_moolah
 	amount = abs(int(amount))
 	c = db.cursor()

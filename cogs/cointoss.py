@@ -27,7 +27,7 @@ class CoinToss(commands.Cog):
 
 	@commands.command(aliases=['coinflip'])
 	async def cointoss(self, ctx, amount: int, opponent: discord.Member):
-		log.debug(f"cointoss({amount}, {opponent})")
+		log.info(f"cointoss({amount}, {opponent}) initiated by {ctx.author}")
 		amount = abs(int(amount))
 
 		with self.cointoss_lock:
@@ -44,7 +44,7 @@ class CoinToss(commands.Cog):
 				database.execute_transaction(7, ctx.author.id, 0, ctx.guild.id, amount)
 				return
 		await ctx.send(
-			f"A cointoss has started between {ctx.author.mention} and {opponent.mention}. {opponent.mention} choose your side, heads or tails?")
+			f"A cointoss has started for {amount} moolah between {ctx.author.mention} and {opponent.mention}. {opponent.mention} choose your side, heads or tails?")
 		try:
 			msg = await self.bot.wait_for('message',
 										  check=(lambda x: x.author.id is opponent.id and x.channel is ctx.channel),

@@ -22,6 +22,7 @@ class Slots(commands.Cog):
 		The Slot machine, a sure way of getting nothing from something.
 		Command: !slots <moolah_amount>
 		"""
+		log.info(f"slots({amount}) initiated by {ctx.author}")
 		try:
 			amount = abs(int(amount))
 		except ValueError as e:
