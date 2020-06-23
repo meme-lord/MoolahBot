@@ -77,7 +77,7 @@ class Admin(commands.Cog):
 	@is_bot_admin()
 	async def restart(self, ctx):
 		"""
-		Initiates a shutdown and unloads all cogs and sys.exit with code 42
+		Initiates a restart and unloads all cogs and sys.exit with code 42
 		"""
 		log.warning(f'[{ctx.author.id}][{ctx.author.name}] has initiated a shutdown!')
 		sys.exit(42)

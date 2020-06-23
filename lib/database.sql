@@ -35,7 +35,11 @@ VALUES (1, 'user_to_user', 'A transaction between two users'),
        (4, 'message_moolah', 'Moolah earned for messages'),
        (5, 'vc_moolah', 'Moolah earned for voice chat'),
        (6, 'slots', 'Winnings and payment for slots'),
-       (7, 'cointoss_escrow_refund', 'Balance refunded from escrow when bet does not take place');
+       (7, 'cointoss_escrow_refund', 'Balance refunded from escrow when bet does not take place'),
+       (8, 'highnoon_escrow', 'Balance kept in escrow for a highnoon bet'),
+       (9, 'highnoon', 'Winnings from highnoon bet'),
+       (10, 'highnoon_escrow_refund', 'Balance refunded from escrow when bet does not take place');
+
 
 CREATE TABLE user_achievements
 (
