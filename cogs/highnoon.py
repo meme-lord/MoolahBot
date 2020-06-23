@@ -50,6 +50,7 @@ class HighNoon(commands.Cog):
 			return
 		elif opponent.id in self.players_ingame:
 			await ctx.send(f'{opponent.display_name} is already in a game!')
+			return
 
 		log.info(f"Highnoon ({amount}, {opponent}) initiated by {ctx.author}")
 		amount = abs(int(amount))
@@ -69,7 +70,7 @@ class HighNoon(commands.Cog):
 				if not success:
 					await ctx.send(err_msg.format(sender=opponent.mention))
 					# roll back the other transaction
-					database.execute_transaction(7, ctx.author.id, 0, ctx.guild.id, amount)
+					database.execute_transaction(10, ctx.author.id, 0, ctx.guild.id, amount)
 					return
 
 			await ctx.send(

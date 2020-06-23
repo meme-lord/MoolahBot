@@ -36,6 +36,7 @@ class CoinToss(commands.Cog):
 			return
 		elif opponent.id in self.players_ingame:
 			await ctx.send(f'{opponent.display_name} is already in a game!')
+			return
 		try:
 			self.players_ingame.append(ctx.author.id)
 			self.players_ingame.append(opponent.id)
