@@ -20,11 +20,6 @@ from lib.events import EventV2
 log = logging.getLogger(__name__)
 
 
-def return_moolah(author_id, opponent_id, guild_id, amount):
-	database.execute_transaction(10, author_id, 0, guild_id, amount)
-	database.execute_transaction(10, opponent_id, 0, guild_id, amount)
-
-
 class HighNoon(commands.Cog):
 	"""
 	All Skill no Luck!
