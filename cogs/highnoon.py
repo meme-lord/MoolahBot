@@ -90,13 +90,17 @@ class HighNoon(commands.Cog):
 			with self.highnoon_lock:
 				# take moolah from each users balance until highnoon is complete
 				# the transaction function already checks if they have sufficient balance
+				transactions = []
 				for player in confirmed_players:
-					success, err_msg = database.execute_transaction(8, 0, player.id, ctx.guild.id, amount)
-					if not success:
-						await ctx.send(err_msg.format(sender=player.mention))
-						# roll back the other transaction
+					transactions.append((player, database.execute_transaction(8, 0, player.id, ctx.guild.id, amount)))
+
+				errors = [t[1][1] for t in transactions if t[1][0] is False]
+				if len(errors) > 0:
+					for player in [t[0] for t in transactions if t[1][0] is True]:
 						database.execute_transaction(10, player.id, 0, ctx.guild.id, amount)
-						return
+					err_msg = '\n'.join(errors)
+					await ctx.send(err_msg.format(sender=ctx.author.mention))
+					return
 
 			word_text, buffer = self.get_random_word()
 			# Send and Close Buffers
