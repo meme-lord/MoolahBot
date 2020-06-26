@@ -32,7 +32,7 @@ class HighNoon(commands.Cog):
 		self.bot.events[__name__] = {}
 		self.bot.events[__name__]['highnoon'] = EventV2()
 		self.path = 'data/english_dictionary'
-		self.files = [f'{self.path}\\{f}' for f in listdir(self.path) if isfile(join(self.path, f))]
+		self.files = [f'{self.path}/{f}' for f in listdir(self.path) if isfile(join(self.path, f))]
 		self.players_ingame = []
 		self.title = "High Noon"
 
@@ -66,25 +66,24 @@ class HighNoon(commands.Cog):
 		self.players_ingame.append(ctx.author.id)
 		self.players_ingame.append([p.id for p in can_play])
 
-		confirm_msg = f'{" ".join([p.mention for p in can_play])} have been challenged to a game of High Noon.\
-		 In this game players are given a word and the fastest one to type it in wins.\nType `yes` to continue'
-		embed = Embed(title=f"{self.title} Confirmation Message", description=confirm_msg, color=0xe7cd18)
-		await ctx.send(embed=embed)
-		results = await asyncio.gather(
-			*((self.confirmation_check(ctx, p, 'yes', 20)) for p in can_play))
-		confirmed_players = [player[0] for player in results if player[1] is True]
-		if len(confirmed_players) == 0:
-			await ctx.send(embed=Embed(title=self.title,
-									   description='Not enough players accepted the game cannot continue.',
-									   color=0xe0321f))
-			return
-		# Add the author to the listen list
-		confirmed_players.append(ctx.author)
-		await ctx.send(embed=Embed(title=self.title,
-								   description=f'{"".join([p.mention for p in confirmed_players])}\n Get ready the game will start soon',
-								   color=0xe7cd18))
 
 		try:
+			confirm_msg = f'{" ".join([p.mention for p in can_play])} have been challenged to a game of High Noon.\
+					 In this game players are given a word and the fastest one to type it in wins.\nType `yes` to continue'
+			embed = Embed(title=f"{self.title} Confirmation Message", description=confirm_msg, color=0xe7cd18)
+			await ctx.send(embed=embed)
+			results = await asyncio.gather(*((self.confirmation_check(ctx, p, 'yes', 20, True)) for p in can_play))
+			confirmed_players = [player[0] for player in results if player[1] is True]
+			confirmed_players.append(ctx.author)
+			if len(confirmed_players) == 1:
+				await ctx.send(embed=Embed(title=self.title,
+										   description='Not enough players accepted the game cannot continue.',
+										   color=0xe0321f))
+				return
+			await ctx.send(embed=Embed(title=self.title,
+									   description=f'{"".join([p.mention for p in confirmed_players])}\n Get ready the game will start soon',
+									   color=0xe7cd18))
+
 			log.info(
 				f'{str(ctx.author.id)} has initiated High Noon for {str(amount)} each between {" ".join([str(x.id) for x in confirmed_players])}')
 			with self.highnoon_lock:
@@ -94,12 +93,15 @@ class HighNoon(commands.Cog):
 				for player in confirmed_players:
 					transactions.append((player, database.execute_transaction(8, 0, player.id, ctx.guild.id, amount)))
 
-				errors = [t[1][1] for t in transactions if t[1][0] is False]
+				errors = []
+				for player, transaction in transactions:
+					if not transaction[0]:
+						errors.append(transaction[1].format(sender=player.mention))
 				if len(errors) > 0:
 					for player in [t[0] for t in transactions if t[1][0] is True]:
 						database.execute_transaction(10, player.id, 0, ctx.guild.id, amount)
 					err_msg = '\n'.join(errors)
-					await ctx.send(err_msg.format(sender=ctx.author.mention))
+					await ctx.send(err_msg)
 					return
 
 			word_text, buffer = self.get_random_word()
@@ -118,7 +120,7 @@ class HighNoon(commands.Cog):
 					database.execute_transaction(10, player.id, 0, ctx.guild.id, amount)
 				return
 			final_results.sort(key=itemgetter(2))
-			message = f'{final_results[0][0].display_name} is the winner!'
+			message = f'{final_results[0][0].display_name} is the winner! They won {amount * len(confirmed_players)} moolah.'
 			message += ''.join([f'\n {p[0].display_name} took {round(p[2], 3)} s' for p in final_results])
 
 			embed = Embed(title="Showdown results:", description=message, color=0x00ff40)
@@ -175,18 +177,22 @@ class HighNoon(commands.Cog):
 		im.save(buffer_1, format='png')
 		return word_text, buffer_1
 
-	async def confirmation_check(self, ctx, player, value_chk, timeout):
+	async def confirmation_check(self, ctx, player, value_chk, timeout, case_insensitive=False):
 		start = timer()
 		try:
 			msg = await self.bot.wait_for('message',
 										  check=(
 											  lambda x: x.author.id is player.id and x.channel is ctx.channel),
 										  timeout=timeout)
+			msg = msg.content
 		except asyncio.TimeoutError:
 			return player, False, 999
 		end = timer()
 		time = (end - start)
-		data = (player, True, time) if msg.content == value_chk else (player, False, time)
+		if case_insensitive:
+			msg = msg.lower()
+			value_chk = value_chk.lower()
+		data = (player, True, time) if msg == value_chk else (player, False, time)
 		return data
 
 
