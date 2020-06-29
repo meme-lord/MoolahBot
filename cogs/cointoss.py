@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import secrets
-import threading
 
 import discord
 from discord.ext import commands
@@ -17,7 +16,7 @@ class CoinToss(commands.Cog):
 	Letting you lose all your Moolah since 2017!
 	"""
 
-	cointoss_lock = threading.Lock()
+	cointoss_lock = asyncio.Lock()
 
 	def __init__(self, bot):
 		self.bot = bot
@@ -41,7 +40,7 @@ class CoinToss(commands.Cog):
 			self.players_ingame.append(ctx.author.id)
 			self.players_ingame.append(opponent.id)
 
-			with self.cointoss_lock:
+			async with self.cointoss_lock:
 				# take moolah from each users balance until cointoss is complete
 				# the transaction function already checks if they have sufficient balance
 				success, err_msg = database.execute_transaction(2, 0, ctx.author.id, ctx.guild.id, amount)

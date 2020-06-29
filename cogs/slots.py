@@ -68,7 +68,12 @@ class Slots(commands.Cog):
 				elif count == 3:
 					pool = amount * items[item][1]
 					await ctx.send(f"You won {pool} moolah!")
-					success, err_msg = database.execute_transaction(6, ctx.author.id, 0, ctx.guild.id, pool)
+					recipient = ctx.author.id
+					sender = 0
+					if pool < 0:
+						sender = recipient
+						recipient = 0
+					success, err_msg = database.execute_transaction(6, recipient, sender, ctx.guild.id, pool)
 					if not success:
 						await ctx.send(err_msg.format(sender={ctx.author.mention}))
 						return

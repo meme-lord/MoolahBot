@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import random
-import threading
 from io import BytesIO
 from operator import itemgetter
 from os import listdir
@@ -25,7 +24,7 @@ class HighNoon(commands.Cog):
 	All Skill no Luck!
 	"""
 
-	highnoon_lock = threading.Lock()
+	highnoon_lock = asyncio.Lock()
 
 	def __init__(self, bot):
 		self.bot = bot
@@ -86,7 +85,7 @@ class HighNoon(commands.Cog):
 
 			log.info(
 				f'{str(ctx.author.id)} has initiated High Noon for {str(amount)} each between {" ".join([str(x.id) for x in confirmed_players])}')
-			with self.highnoon_lock:
+			async with self.highnoon_lock:
 				# take moolah from each users balance until highnoon is complete
 				# the transaction function already checks if they have sufficient balance
 				transactions = []
