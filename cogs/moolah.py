@@ -3,6 +3,7 @@ import datetime
 import logging
 
 from discord.ext import commands
+from discord.errors import NotFound
 from prettytable import PrettyTable
 
 import config
@@ -34,13 +35,18 @@ class Moolah(commands.Cog):
 		author_in_top10 = False
 		entry_list = []
 		for discord_id, balance in entries:
+			try:
+				member = await ctx.guild.fetch_member(discord_id)
+			except NotFound:
+				continue
 			if discord_id == ctx.author.id:
 				author_in_top10 = True
-			member = await ctx.guild.fetch_member(discord_id)
 			if entry_list and entry_list[-1][2] == balance:
 				entry_list.append([entry_list[-1][0], member.display_name, balance])
 			else:
 				entry_list.append([position, member.display_name, balance])
+			if position == 10:
+				break
 			position += 1
 		if not author_in_top10:
 			entry_list.append(['...', '...', '...'])
