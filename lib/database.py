@@ -74,7 +74,7 @@ def moolah_earned(discord_id: int, guild_id: int, amount: int):
 def topdog(guild_id: int):
 	c = db.cursor()
 	c.execute(
-		"SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC LIMIT 10",
+		"SELECT discord_id, balance FROM users WHERE guild_id=%s AND discord_id!=0 ORDER BY balance DESC LIMIT 20",
 		(guild_id,))
 	return c.fetchall()
 
