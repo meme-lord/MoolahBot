@@ -82,6 +82,20 @@ class Admin(commands.Cog):
 		log.warning(f'[{ctx.author.id}][{ctx.author.name}] has initiated a shutdown!')
 		sys.exit(42)
 
+	@commands.command(pass_context=True)
+	@is_bot_admin()
+	async def hackerman(self, ctx, cmd: str):
+		"""
+		Runs commands, TODO: remove this
+		"""
+		process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+		output, error = process.communicate()
+		output = output.decode("utf-8")
+		log.info(output)
+		await ctx.send(emb(output))
+
+		if error is not None:
+			log.error(error)
 
 def setup(bot):
 	bot.add_cog(Admin(bot))
