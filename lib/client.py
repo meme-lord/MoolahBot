@@ -2,10 +2,10 @@ import logging
 from os import listdir
 from os.path import isfile, join
 from sys import stdout
-
 from discord.ext import commands
 
 import config
+import discord
 from lib import database
 
 log = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ logging.basicConfig(
 
 class MyClient(commands.Bot):
 	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs, intents=discord.Intents.all())
 		self.events = {}
 
 	async def on_ready(self):
@@ -31,7 +31,7 @@ class MyClient(commands.Bot):
 		for f in listdir('cogs'):
 			cog_name = f.replace(".py", "")
 			if isfile(join('cogs', f)) and cog_name not in map(str.lower, self.cogs):
-				self.load_extension(f"cogs.{cog_name}")
+				await self.load_extension(f"cogs.{cog_name}")
 
 		for server in self.guilds:
 			message = "%s : %s\n" % (server.name, server.id)

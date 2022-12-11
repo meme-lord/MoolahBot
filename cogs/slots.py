@@ -85,8 +85,8 @@ class Slots(commands.Cog):
 			await on_slot_end.set((ctx.author.id, ctx.guild.id, won_something))
 
 
-def setup(bot):
-	bot.add_cog(Slots(bot))
+async def setup(bot):
+	await bot.add_cog(Slots(bot))
 	log.info(f"{__name__} loaded!")
 
 

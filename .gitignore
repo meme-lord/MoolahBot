@@ -3,3 +3,5 @@ config.py
 __pycache__/
 cogs/__pycache__/
 venv/
+*.log
+data/welcome_imgs/*

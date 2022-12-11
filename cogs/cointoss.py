@@ -87,8 +87,8 @@ class CoinToss(commands.Cog):
 			self.players_ingame.remove(opponent.id)
 
 
-def setup(bot):
-	bot.add_cog(CoinToss(bot))
+async def setup(bot):
+	await bot.add_cog(CoinToss(bot))
 	log.info(f"{__name__} loaded!")
 
 

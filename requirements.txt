@@ -3,4 +3,4 @@ PrettyTable
 mysqlclient
 discord
 matplotlib
-emoji
+emoji==1.7

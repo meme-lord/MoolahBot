@@ -185,8 +185,8 @@ def circle_progress(no: int, max):
 	return plt
 
 
-def setup(bot):
-	bot.add_cog(PersonalStats(bot))
+async def setup(bot):
+	await bot.add_cog(PersonalStats(bot))
 	log.info(f"{__name__} loaded!")
 
 

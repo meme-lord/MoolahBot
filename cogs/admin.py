@@ -82,8 +82,8 @@ class Admin(commands.Cog):
 		log.warning(f'[{ctx.author.id}][{ctx.author.name}] has initiated a shutdown!')
 		sys.exit(42)
 
-def setup(bot):
-	bot.add_cog(Admin(bot))
+async def setup(bot):
+	await bot.add_cog(Admin(bot))
 	log.info(f"{__name__} loaded!")
 
 

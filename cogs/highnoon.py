@@ -195,8 +195,8 @@ class HighNoon(commands.Cog):
 		return data
 
 
-def setup(bot):
-	bot.add_cog(HighNoon(bot))
+async def setup(bot):
+	await bot.add_cog(HighNoon(bot))
 	log.info(f"{__name__} loaded!")
 
 

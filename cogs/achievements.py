@@ -123,8 +123,8 @@ class Achievements(commands.Cog):
 			await send_dm(self.bot, user_id, message)
 
 
-def setup(bot):
-	bot.add_cog(Achievements(bot))
+async def setup(bot):
+	await bot.add_cog(Achievements(bot))
 	log.info(f"{__name__} loaded!")
 
 

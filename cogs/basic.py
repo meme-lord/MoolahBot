@@ -22,8 +22,8 @@ class Basic(commands.Cog):
 		await ctx.send("Don't get smart with me kiddo")
 
 
-def setup(bot):
-	bot.add_cog(Basic(bot))
+async def setup(bot):
+	await bot.add_cog(Basic(bot))
 	log.info(f"{__name__} loaded!")
 
 

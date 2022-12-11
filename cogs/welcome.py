@@ -31,8 +31,8 @@ class Welcome(commands.Cog):
 		await member.guild.system_channel.send(embed=embed, file=File(image))
 
 
-def setup(bot):
-	bot.add_cog(Welcome(bot))
+async def setup(bot):
+	await bot.add_cog(Welcome(bot))
 	log.info(f"{__name__} loaded!")
 
 

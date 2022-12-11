@@ -50,8 +50,8 @@ class RogueGuard(commands.Cog):
 					await send_dm(self.bot, b_k_user.id, message)
 
 
-def setup(bot):
-	bot.add_cog(RogueGuard(bot))
+async def setup(bot):
+	await bot.add_cog(RogueGuard(bot))
 	log.info(f"{__name__} loaded!")
 
 
