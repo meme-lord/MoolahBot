@@ -21,7 +21,7 @@ class Admin(commands.Cog):
 		Loads an extension.
 		"""
 		try:
-			self.bot.load_extension(f'cogs.{extension_name}')
+			await self.bot.load_extension(f'cogs.{extension_name}')
 			await ctx.message.channel.send(emb("Module [{}] Loaded".format(extension_name)))
 		except (AttributeError, ImportError) as e:
 			await ctx.message.channel.send("```py\n{}: {}\n```".format(type(e).__name__, str(e)))
@@ -33,7 +33,7 @@ class Admin(commands.Cog):
 		Unloads an extension.
 		"""
 		try:
-			self.bot.unload_extension(f'cogs.{extension_name}')
+			await self.bot.unload_extension(f'cogs.{extension_name}')
 			await ctx.message.channel.send(emb("Module [{}] Unloaded!.".format(extension_name)))
 		except (AttributeError, ImportError) as e:
 			await ctx.message.channel.send("```py\n{}: {}\n```".format(type(e).__name__, str(e)))
@@ -44,7 +44,7 @@ class Admin(commands.Cog):
 		"""
 		Reloads an extension.
 		"""
-		self.bot.reload_extension(f'cogs.{extension_name.lower()}')
+		await self.bot.reload_extension(f'cogs.{extension_name.lower()}')
 		await ctx.send(emb(f'{extension_name.lower()} reloaded!'))
 
 	@commands.command(pass_context=True)

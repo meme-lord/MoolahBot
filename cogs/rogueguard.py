@@ -24,17 +24,17 @@ class RogueGuard(commands.Cog):
 		Checks if user was kicked or banned and then get the users kick/ban history.
 		If the user has kicked or banned more than 3 times in 1 day, remove all roles with kick/ban privileges.
 		"""
-		b_k = await member.guild.audit_logs(limit=None).flatten()
+		b_k = [ i async for i in member.guild.audit_logs(limit=None) ]
 		b_k = [x for x in b_k if x.created_at > (datetime.utcnow() - timedelta(minutes=1))]
 		ba = [entry for entry in b_k if entry.target.id == member.id]
 		if len(ba):
 			b_k_user = ba[0].user
-			bans = await member.guild.audit_logs(user=b_k_user,
+			bans = [ i async for i in member.guild.audit_logs(user=b_k_user,
 												 after=datetime.utcnow() - timedelta(days=1),
-												 action=AuditLogAction.ban).flatten()
-			kicks = await member.guild.audit_logs(user=b_k_user,
+												 action=AuditLogAction.ban)]
+			kicks = [ i async for i in member.guild.audit_logs(user=b_k_user,
 												  after=datetime.utcnow() - timedelta(days=1),
-												  action=AuditLogAction.kick).flatten()
+												  action=AuditLogAction.kick)]
 			if len(bans) > 3 or len(kicks) > 3 and not b_k_user.top_role.permissions.administrator:
 				if not b_k_user.guild.owner_id == b_k_user.id:
 					roles_to_remove = [role for role in b_k_user.roles if

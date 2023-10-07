@@ -115,7 +115,7 @@ async def get_profile_pic(person):
 	Downloads Discord profile pic and loads it
 	:returns ImageObj , buffer:
 	"""
-	f = BytesIO(await person.avatar_url_as(size=128, format='png').read())
+	f = BytesIO(await person.avatar.replace(size=128, format='png').read())
 	profpic = Image.open(f)
 	return profpic
 
